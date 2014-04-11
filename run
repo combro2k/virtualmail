@@ -1,9 +1,22 @@
 #!/bin/bash
 set -e
 
+if [ ! -z "$IPV6ADDR" ]; then
+        echo  $IPV6ADDR
+        ip -6 addr add "$IPV6ADDR" dev eth0
+fi
+
+sleep 2
+
+if [ ! -z "$IPV6GW" ]; then
+        echo $IPV6GW
+        ip -6 route add  default via "$IPV6GW" dev eth0
+fi
+
 sed -i "s/__REPLACE_DATABASE_HOST__/${MYSQL_PORT_3306_TCP_ADDR}/g" /etc/postfix/mysql-virtual-alias-maps.cf
 sed -i "s/__REPLACE_DATABASE_PORT__/${MYSQL_PORT_3306_TCP_PORT}/g" /etc/postfix/mysql-virtual-alias-maps.cf
 sed -i "s/__REPLACE_DATABASE_PASSWORD__/${POSTFIX_MYSQL_PASSWORD}/g" /etc/postfix/mysql-virtual-alias-maps.cf
+sed -i "s/mail.example.org/${HOSTNAME}/g" /etc/postfix/main.cf
 
 sed -i "s/__REPLACE_DATABASE_HOST__/${MYSQL_PORT_3306_TCP_ADDR}/g" /etc/postfix/mysql-virtual-domains-maps.cf
 sed -i "s/__REPLACE_DATABASE_PORT__/${MYSQL_PORT_3306_TCP_PORT}/g" /etc/postfix/mysql-virtual-domains-maps.cf
@@ -13,7 +26,24 @@ sed -i "s/__REPLACE_DATABASE_HOST__/${MYSQL_PORT_3306_TCP_ADDR}/g" /etc/postfix/
 sed -i "s/__REPLACE_DATABASE_PORT__/${MYSQL_PORT_3306_TCP_PORT}/g" /etc/postfix/mysql-virtual-mailbox-maps.cf
 sed -i "s/__REPLACE_DATABASE_PASSWORD__/${POSTFIX_MYSQL_PASSWORD}/g" /etc/postfix/mysql-virtual-mailbox-maps.cf
 
-service syslog-ng start
-service postfix start
-tail -F /var/log/mail.log
+sed -i "s/__REPLACE_DATABASE_HOST__/${MYSQL_PORT_3306_TCP_ADDR}/g" /etc/amavis/conf.d/50-user
+sed -i "s/__REPLACE_DATABASE_PORT__/${MYSQL_PORT_3306_TCP_PORT}/g" /etc/amavis/conf.d/50-user
+sed -i "s/__REPLACE_DATABASE_PASSWORD__/${POSTFIX_MYSQL_PASSWORD}/g" /etc/amavis/conf.d/50-user
 
+sed -i "s/__REPLACE_DATABASE_HOST__/${MYSQL_PORT_3306_TCP_ADDR}/g" /etc/dovecot/dovecot-sql.conf.ext
+sed -i "s/__REPLACE_DATABASE_PORT__/${MYSQL_PORT_3306_TCP_PORT}/g" /etc/dovecot/dovecot-sql.conf.ext
+sed -i "s/__REPLACE_DATABASE_PASSWORD__/${POSTFIX_MYSQL_PASSWORD}/g" /etc/dovecot/dovecot-sql.conf.ext
+
+sed -i "s/mail.example.com/${HOSTNAME}/g" /etc/mailname
+
+cron -f &
+service rsyslog start
+service spamassassin start
+service clamav-freshclam start
+/etc/init.d/clamav-daemon start
+service amavis start
+service postgrey start
+dovecot
+service postfix start
+
+tail -F /var/log/mail.log

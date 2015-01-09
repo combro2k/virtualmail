@@ -27,7 +27,7 @@ RUN groupadd -g 1000 vmail && \
 RUN adduser clamav amavis
 RUN adduser amavis clamav
 RUN sed -i "s/Foreground false/Foreground true/g" /etc/clamav/clamd.conf && \
-    sed -i "s/Foreground false/Foreground true/g" /etc/clamav/freshclam.conf
+    sed -i "s/Foreground false/Foreground true/g" /etc/clamav/freshclam.conf && /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
 
 # Spamassassin
 RUN sed -i "s/ENABLED\=0/ENABLED=1/g" /etc/default/spamassassin && \

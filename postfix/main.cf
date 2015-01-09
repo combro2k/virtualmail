@@ -100,7 +100,7 @@ virtual_uid_maps = static:1000
 
 content_filter=smtp-amavis:[127.0.0.1]:10024
 
-milter_default_action = accept
 milter_protocol = 2
-#smtpd_milters = inet:localhost:10023 // opendkim
-#non_smtpd_milters = $smtpd_milters // opendkim
+milter_default_action = accept
+smtpd_milters=inet:localhost:12301
+non_smtpd_milters=inet:localhost:12301

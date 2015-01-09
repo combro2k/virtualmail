@@ -36,14 +36,4 @@ sed -i "s/__REPLACE_DATABASE_PASSWORD__/${POSTFIX_MYSQL_PASSWORD}/g" /etc/doveco
 
 sed -i "s/mail.example.com/${HOSTNAME}/g" /etc/mailname
 
-cron -f &
-service rsyslog start
-service spamassassin start
-service clamav-freshclam start
-/etc/init.d/clamav-daemon start
-service amavis start
-service postgrey start
-dovecot
-service postfix start
-
-tail -F /var/log/mail.log
+/usr/bin/supervisord -c /etc/supervisor/supervisord.conf

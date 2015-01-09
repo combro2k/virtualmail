@@ -15,6 +15,8 @@ RUN apt-get install -yq cron
 RUN apt-get install -yq amavisd-new spamassassin clamav-daemon \
                        pyzor razor libencode-detect-perl libdbi-perl libdbd-mysql-perl \
                        arj cabextract cpio nomarch pax unzip zip
+RUN apt-get install -yq supervisor
+RUN apt-get install -yq opendkim opendkim-tools
 
 RUN groupadd -g 1000 vmail && \
     useradd -g vmail -u 1000 vmail -d /var/vmail && \
@@ -54,13 +56,24 @@ ADD dovecot/conf.d/15-mailboxes.conf /etc/dovecot/conf.d/15-mailboxes.conf
 ADD dovecot/conf.d/20-managesieve.conf /etc/dovecot/conf.d/20-managesieve.conf
 ADD dovecot/conf.d/90-sieve.conf /etc/dovecot/conf.d/90-sieve.conf
 ADD dovecot/dovecot-sql.conf.ext /etc/dovecot/dovecot-sql.conf.ext
+ADD supervisor/supervisord.conf /etc/supervisor/supervisord.conf
 
 # Postgrey
 RUN mkdir /var/spool/postfix/postgrey
 RUN sed -i "s#^POSTGREY_OPTS\=\"--inet\=10023\"#POSTGREY_OPTS=\"--unix=/var/spool/postfix/postgrey/socket --delay=300\"#g" /etc/default/postgrey
 
+# OpenDKIM
+ADD opendkim/opendkim.conf /etc/opendkim/opendkim.conf
+ADD opendkim/KeyTable /etc/opendkim/KeyTable
+ADD opendkim/SigningTable /etc/opendkim/SigningTable
+ADD opendkim/TrustedHosts /etc/opendkim/TrustedHosts
+
 ADD run /usr/local/bin/run
+ADD postfix/bin/postfix.sh /usr/local/bin/postfix.sh
+ADD clamav/clamav_init.sh /usr/local/bin/clamav_init.sh
 RUN chmod +x /usr/local/bin/run
+RUN chmod +x /usr/local/bin/postfix.sh
+RUN chmod +x /usr/local/bin/clamav_init.sh
 
 EXPOSE 587 25 465 4190 995 993 110 143
 VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis"]

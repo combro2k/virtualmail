@@ -26,6 +26,8 @@ RUN groupadd -g 1000 vmail && \
 # ClamAV
 RUN adduser clamav amavis
 RUN adduser amavis clamav
+RUN sed -i "s/Foreground false/Foreground true/g" /etc/clamav/clamd.conf && \
+    sed -i "s/Foreground false/Foreground true/g" /etc/clamav/freshclam.conf
 
 # Spamassassin
 RUN sed -i "s/ENABLED\=0/ENABLED=1/g" /etc/default/spamassassin && \
@@ -63,7 +65,7 @@ RUN mkdir /var/spool/postfix/postgrey
 RUN sed -i "s#^POSTGREY_OPTS\=\"--inet\=10023\"#POSTGREY_OPTS=\"--unix=/var/spool/postfix/postgrey/socket --delay=300\"#g" /etc/default/postgrey
 
 # OpenDKIM
-ADD opendkim/opendkim.conf /etc/opendkim/opendkim.conf
+ADD opendkim/opendkim.conf /etc/opendkim.conf
 ADD opendkim/KeyTable /etc/opendkim/KeyTable
 ADD opendkim/SigningTable /etc/opendkim/SigningTable
 ADD opendkim/TrustedHosts /etc/opendkim/TrustedHosts
@@ -71,11 +73,13 @@ ADD opendkim/TrustedHosts /etc/opendkim/TrustedHosts
 ADD run /usr/local/bin/run
 ADD postfix/bin/postfix.sh /usr/local/bin/postfix.sh
 ADD clamav/clamav_init.sh /usr/local/bin/clamav_init.sh
+ADD amavisd/amavisd_init.sh /usr/local/bin/amavisd_init.sh
 RUN chmod +x /usr/local/bin/run
 RUN chmod +x /usr/local/bin/postfix.sh
 RUN chmod +x /usr/local/bin/clamav_init.sh
+RUN chmod +x /usr/local/bin/amavisd_init.sh
 
 EXPOSE 587 25 465 4190 995 993 110 143
-VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis"]
+VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim"]
 
 CMD ["/usr/local/bin/run"]

@@ -59,6 +59,7 @@ ADD dovecot/conf.d/20-managesieve.conf /etc/dovecot/conf.d/20-managesieve.conf
 ADD dovecot/conf.d/90-sieve.conf /etc/dovecot/conf.d/90-sieve.conf
 ADD dovecot/dovecot-sql.conf.ext /etc/dovecot/dovecot-sql.conf.ext
 ADD supervisor/supervisord.conf /etc/supervisor/supervisord.conf
+RUN chown -R vmail:vmail /etc/dovecot/sieve
 
 # Postgrey
 RUN mkdir /var/spool/postfix/postgrey

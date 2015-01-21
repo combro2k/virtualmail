@@ -17,7 +17,7 @@ RUN apt-get install -yq amavisd-new spamassassin clamav-daemon \
                        arj cabextract cpio nomarch pax unzip zip
 RUN apt-get install -yq supervisor
 RUN apt-get install -yq opendkim opendkim-tools
-RUN apt-get install -yq curl build-essential cpanoutdated cpanminus
+RUN apt-get install -yq curl build-essential
 
 RUN groupadd -g 1000 vmail && \
     useradd -g vmail -u 1000 vmail -d /var/vmail && \
@@ -79,7 +79,7 @@ RUN mkdir -p /usr/src/sympa && \
     ./configure --prefix=/usr && \
     make && \
     make install && \
-    cpan-outdated -p | cpanm && \
+    cpan -r && \
     cpan -i File::Copy::Recursive \
         HTML::StripScripts::Parser \
         Locale::TextDomain \

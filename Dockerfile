@@ -2,22 +2,27 @@ FROM ubuntu:14.04
 MAINTAINER Martijn van Maurik <docker@vmaurik.nl>
 
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update
-RUN apt-get dist-upgrade -yq
 
-RUN bash -c 'debconf-set-selections <<< "postfix postfix/main_mailer_type string Internet site"'
-RUN bash -c 'debconf-set-selections <<< "postfix postfix/mailname string mail.example.com"'
+RUN apt-get update && apt-get dist-upgrade -yq
 
-RUN apt-get install -yq libberkeleydb-perl libnet-dns-perl libnet-server-perl libnet-rblclient-perl
-RUN apt-get install -yq postfix postfix-mysql postgrey rsyslog
-RUN apt-get install -yq dovecot-core dovecot-imapd dovecot-managesieved dovecot-mysql dovecot-pop3d dovecot-sieve
-RUN apt-get install -yq cron
-RUN apt-get install -yq amavisd-new spamassassin clamav-daemon \
-                       pyzor razor libencode-detect-perl libdbi-perl libdbd-mysql-perl \
-                       arj cabextract cpio nomarch pax unzip zip
-RUN apt-get install -yq supervisor
-RUN apt-get install -yq opendkim opendkim-tools
-RUN apt-get install -yq curl build-essential
+RUN bash -c 'debconf-set-selections <<< "postfix postfix/main_mailer_type string Internet site"' && \
+    bash -c 'debconf-set-selections <<< "postfix postfix/mailname string mail.example.com"'
+
+RUN apt-get install -yq \
+    libberkeleydb-perl libnet-dns-perl libnet-server-perl libnet-rblclient-perl \
+    postfix postfix-mysql postgrey rsyslog \
+    dovecot-core dovecot-imapd dovecot-managesieved dovecot-mysql dovecot-pop3d dovecot-sieve \
+    cron amavisd-new spamassassin clamav-daemon \
+    pyzor razor libencode-detect-perl libdbi-perl libdbd-mysql-perl \
+    arj cabextract cpio nomarch pax unzip zip \
+    supervisor opendkim opendkim-tools curl \
+    libxml-libxml-perl libhtml-stripscripts-parser-perl \
+    libfile-copy-recursive-perl libdist-zilla-localetextdomain-perl \
+    libmime-charset-perl libmime-encwords-perl libmime-lite-html-perl \
+    libmime-types-perl libnet-netmask-perl libtemplate-perl \
+    libterm-progressbar-perl libintl-perl libauthcas-perl libcrypt-ciphersaber-perl \
+    libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl \
+    libfile-nfslock-perl
 
 RUN groupadd -g 1000 vmail && \
     useradd -g vmail -u 1000 vmail -d /var/vmail && \
@@ -25,9 +30,9 @@ RUN groupadd -g 1000 vmail && \
     chown vmail:vmail /var/vmail
 
 # ClamAV
-RUN adduser clamav amavis
-RUN adduser amavis clamav
-RUN sed -i "s/Foreground false/Foreground true/g" /etc/clamav/clamd.conf && \
+RUN adduser clamav amavis && \
+    adduser amavis clamav && \
+    sed -i "s/Foreground false/Foreground true/g" /etc/clamav/clamd.conf && \
     sed -i "s/Foreground false/Foreground true/g" /etc/clamav/freshclam.conf && /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
 
 # Spamassassin
@@ -76,33 +81,27 @@ ADD opendkim/TrustedHosts /etc/opendkim/TrustedHosts
 RUN mkdir -p /usr/src/sympa && \
     cd /usr/src/sympa && \
     curl http://www.sympa.org/distribution/sympa-6.1.24.tar.gz | tar zxv --strip-components=1 && \
-    ./configure --prefix=/usr && \
+    ./configure --prefix=/usr \
+        --sysconfdir=/etc \
+        --with-staticdir=/var/www/sympa/static_content \
+        --with-spooldir=/var/spool/sympa \
+        --with-defaultdir=/etc/default \
+        --with-aliases_file=/etc/postfix/sympa_aliases && \
     make && \
     make install && \
-    cpan -i File::Copy::Recursive \
-        HTML::StripScripts::Parser \
-        Locale::TextDomain \
+    cpan -f install \
         MHonArc::UTF8 \
-        MIME::Charset \
-        MIME::EncWords \
-        MIME::Lite::HTML \
-        MIME::Types \
-        Net::Netmask \
-        Template \
         Template::Stash::XS \
-        Term::ProgressBar
+        Text::LineFold
 
 ADD run /usr/local/bin/run
 ADD postfix/bin/postfix.sh /usr/local/bin/postfix.sh
 ADD clamav/clamav_init.sh /usr/local/bin/clamav_init.sh
 ADD amavisd/amavisd_init.sh /usr/local/bin/amavisd_init.sh
 
-RUN chmod +x /usr/local/bin/run
-RUN chmod +x /usr/local/bin/postfix.sh
-RUN chmod +x /usr/local/bin/clamav_init.sh
-RUN chmod +x /usr/local/bin/amavisd_init.sh
+RUN chmod +x /usr/local/bin/run /usr/local/bin/postfix.sh /usr/local/bin/clamav_init.sh /usr/local/bin/amavisd_init.sh
 
 EXPOSE 587 25 465 4190 995 993 110 143
-VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim"]
+VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/sympa", "/data/sympa"]
 
 CMD ["/usr/local/bin/run"]

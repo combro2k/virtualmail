@@ -81,12 +81,7 @@ ADD opendkim/TrustedHosts /etc/opendkim/TrustedHosts
 RUN mkdir -p /usr/src/sympa && \
     cd /usr/src/sympa && \
     curl http://www.sympa.org/distribution/sympa-6.1.24.tar.gz | tar zxv --strip-components=1 && \
-    ./configure --prefix=/usr \
-        --sysconfdir=/etc \
-        --with-staticdir=/var/www/sympa/static_content \
-        --with-spooldir=/var/spool/sympa \
-        --with-defaultdir=/etc/default \
-        --with-aliases_file=/etc/postfix/sympa_aliases && \
+    ./configure && \
     make && \
     make install && \
     cpan -f install \

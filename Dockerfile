@@ -22,7 +22,7 @@ RUN apt-get install -yq \
     libmime-types-perl libnet-netmask-perl libtemplate-perl \
     libterm-progressbar-perl libintl-perl libauthcas-perl libcrypt-ciphersaber-perl \
     libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl \
-    libfile-nfslock-perl
+    libfile-nfslock-perl apache2
 
 RUN groupadd -g 1000 vmail && \
     useradd -g vmail -u 1000 vmail -d /var/vmail && \

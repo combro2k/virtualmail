@@ -102,6 +102,6 @@ ADD amavisd/amavisd_init.sh /usr/local/bin/amavisd_init.sh
 RUN chmod +x /usr/local/bin/run /usr/local/bin/postfix.sh /usr/local/bin/clamav_init.sh /usr/local/bin/amavisd_init.sh
 
 EXPOSE 587 25 465 4190 995 993 110 143
-VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/sympa", "/data/sympa"]
+VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/sympa.conf", "/data/sympa"]
 
 CMD ["/usr/local/bin/run"]

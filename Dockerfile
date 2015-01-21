@@ -79,7 +79,6 @@ RUN mkdir -p /usr/src/sympa && \
     ./configure --prefix=/usr && \
     make && \
     make install && \
-    cpan -r && \
     cpan -i File::Copy::Recursive \
         HTML::StripScripts::Parser \
         Locale::TextDomain \

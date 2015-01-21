@@ -87,7 +87,9 @@ RUN mkdir -p /usr/src/sympa && \
     cpan -f install \
         MHonArc::UTF8 \
         Template::Stash::XS \
-        Text::LineFold
+        Text::LineFold && \
+    useradd sympa && \
+    chown -R sympa:sympa /home/sympa
 
 ADD run /usr/local/bin/run
 ADD postfix/bin/postfix.sh /usr/local/bin/postfix.sh
@@ -97,6 +99,6 @@ ADD amavisd/amavisd_init.sh /usr/local/bin/amavisd_init.sh
 RUN chmod +x /usr/local/bin/run /usr/local/bin/postfix.sh /usr/local/bin/clamav_init.sh /usr/local/bin/amavisd_init.sh
 
 EXPOSE 587 25 465 4190 995 993 110 143
-VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/sympa.conf", "/data/sympa"]
+VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/sympa.conf", "/home/sympa/list_data", "/home/sympa/arc", "/etc/wwsympa.conf"]
 
 CMD ["/usr/local/bin/run"]

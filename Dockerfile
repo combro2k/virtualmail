@@ -17,6 +17,7 @@ RUN apt-get install -yq amavisd-new spamassassin clamav-daemon \
                        arj cabextract cpio nomarch pax unzip zip
 RUN apt-get install -yq supervisor
 RUN apt-get install -yq opendkim opendkim-tools
+RUN apt-get install -yq curl build-essential cpanoutdated cpanminus
 
 RUN groupadd -g 1000 vmail && \
     useradd -g vmail -u 1000 vmail -d /var/vmail && \
@@ -71,10 +72,32 @@ ADD opendkim/KeyTable /etc/opendkim/KeyTable
 ADD opendkim/SigningTable /etc/opendkim/SigningTable
 ADD opendkim/TrustedHosts /etc/opendkim/TrustedHosts
 
+# Sympa
+RUN mkdir -p /usr/src/sympa && \
+    cd /usr/src/sympa && \
+    curl http://www.sympa.org/distribution/sympa-6.1.24.tar.gz | tar zxv --strip-components=1 && \
+    ./configure --prefix=/usr && \
+    make && \
+    make install && \
+    cpan-outdated -p | cpanm && \
+    cpan -i File::Copy::Recursive \
+        HTML::StripScripts::Parser \
+        Locale::TextDomain \
+        MHonArc::UTF8 \
+        MIME::Charset \
+        MIME::EncWords \
+        MIME::Lite::HTML \
+        MIME::Types \
+        Net::Netmask \
+        Template \
+        Template::Stash::XS \
+        Term::ProgressBar
+
 ADD run /usr/local/bin/run
 ADD postfix/bin/postfix.sh /usr/local/bin/postfix.sh
 ADD clamav/clamav_init.sh /usr/local/bin/clamav_init.sh
 ADD amavisd/amavisd_init.sh /usr/local/bin/amavisd_init.sh
+
 RUN chmod +x /usr/local/bin/run
 RUN chmod +x /usr/local/bin/postfix.sh
 RUN chmod +x /usr/local/bin/clamav_init.sh

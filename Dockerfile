@@ -92,7 +92,8 @@ RUN mkdir -p /usr/src/sympa && \
         Template::Stash::XS \
         Text::LineFold && \
     useradd sympa && \
-    chown -R sympa:sympa /home/sympa
+    chown -R sympa:sympa /home/sympa && \
+    locale-gen en_US en_US.UTF-8 nl_NL nl_NL.UTF-8
 
 ADD run /usr/local/bin/run
 ADD postfix/bin/postfix.sh /usr/local/bin/postfix.sh

@@ -3,6 +3,9 @@ MAINTAINER Martijn van Maurik <docker@vmaurik.nl>
 
 ENV DEBIAN_FRONTEND noninteractive
 
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
+    echo deb http://nginx.org/packages/mainline/ubuntu trusty nginx > /etc/apt/sources.list.d/nginx-stable-trusty.list
+
 RUN apt-get update && apt-get dist-upgrade -yq
 
 RUN bash -c 'debconf-set-selections <<< "postfix postfix/main_mailer_type string Internet site"' && \
@@ -22,7 +25,7 @@ RUN apt-get install -yq \
     libmime-types-perl libnet-netmask-perl libtemplate-perl \
     libterm-progressbar-perl libintl-perl libauthcas-perl libcrypt-ciphersaber-perl \
     libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl \
-    libfile-nfslock-perl apache2
+    libfile-nfslock-perl fcgiwrap nginx
 
 RUN groupadd -g 1000 vmail && \
     useradd -g vmail -u 1000 vmail -d /var/vmail && \

@@ -84,27 +84,24 @@ ADD opendkim/TrustedHosts /etc/opendkim/TrustedHosts
 RUN mkdir -p /usr/src/sympa && \
     cd /usr/src/sympa && \
     curl http://www.sympa.org/distribution/sympa-6.1.24.tar.gz | tar zxv --strip-components=1 && \
-    ./configure && \
-    make && \
-    make install && \
-    cpan -f install \
-        MHonArc::UTF8 \
-        Template::Stash::XS \
-        Text::LineFold && \
-    useradd sympa && \
-    chown -R sympa:sympa /home/sympa && \
+    ./configure && make && make install && \
+    cpan -f install MHonArc::UTF8 Template::Stash::XS Text::LineFold && \
+    useradd sympa && chown -R sympa:sympa /home/sympa && \
     locale-gen en_US en_US.UTF-8 nl_NL nl_NL.UTF-8 && \
     sed -i 's#www-data#sympa#g' /etc/init.d/fcgiwrap && \
     sed -i 's#user  nginx;#user  sympa;#g' /etc/nginx/nginx.conf && \
     rm /etc/nginx/conf.d/*.conf
+
+ADD sympa/sympa-nginx.conf /etc/nginx/conf.d/sympa-nginx.conf
 
 ADD run /usr/local/bin/run
 ADD postfix/bin/postfix.sh /usr/local/bin/postfix.sh
 ADD clamav/clamav_init.sh /usr/local/bin/clamav_init.sh
 ADD amavisd/amavisd_init.sh /usr/local/bin/amavisd_init.sh
 ADD opendkim/opendkim.sh /usr/local/bin/opendkim.sh
+ADD sympa/sympa.sh /usr/local/bin/sympa.sh
 
-RUN chmod +x /usr/local/bin/run /usr/local/bin/postfix.sh /usr/local/bin/clamav_init.sh /usr/local/bin/amavisd_init.sh /usr/local/bin/opendkim.sh
+RUN chmod +x /usr/local/bin/run /usr/local/bin/postfix.sh /usr/local/bin/clamav_init.sh /usr/local/bin/amavisd_init.sh /usr/local/bin/opendkim.sh /usr/local/bin/sympa.sh
 
 EXPOSE 587 25 465 4190 995 993 110 143
 VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/sympa.conf", "/home/sympa/list_data", "/home/sympa/arc", "/etc/wwsympa.conf"]

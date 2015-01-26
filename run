@@ -36,4 +36,6 @@ sed -i "s/__REPLACE_DATABASE_PASSWORD__/${POSTFIX_MYSQL_PASSWORD}/g" /etc/doveco
 
 sed -i "s/mail.example.com/${HOSTNAME}/g" /etc/mailname
 
+sed -i "s/mail.example.com/${HOSTNAME}/g" /etc/nginx/conf.d/sympa-nginx.conf
+
 /usr/bin/supervisord -c /etc/supervisor/supervisord.conf

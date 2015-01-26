@@ -94,6 +94,7 @@ RUN mkdir -p /usr/src/sympa && \
     rm /etc/nginx/conf.d/*.conf
 
 ADD sympa/sympa-nginx.conf /etc/nginx/conf.d/sympa-nginx.conf
+ADD sympa/sympa.conf /etc/sympa.conf
 
 ADD run /usr/local/bin/run
 ADD postfix/bin/postfix.sh /usr/local/bin/postfix.sh
@@ -105,6 +106,6 @@ ADD sympa/sympa.sh /usr/local/bin/sympa.sh
 RUN chmod +x /usr/local/bin/run /usr/local/bin/postfix.sh /usr/local/bin/clamav_init.sh /usr/local/bin/amavisd_init.sh /usr/local/bin/opendkim.sh /usr/local/bin/sympa.sh
 
 EXPOSE 587 25 465 4190 995 993 110 143
-VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/sympa.conf", "/home/sympa/list_data", "/home/sympa/arc", "/etc/wwsympa.conf" , "/etc/mail/sympa_aliases", "/etc/mail/sympa_aliases.db"]
+VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/home/sympa/list_data", "/home/sympa/arc"]
 
 CMD ["/usr/local/bin/run"]

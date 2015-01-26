@@ -103,7 +103,7 @@ ADD clamav/clamav_init.sh /usr/local/bin/clamav_init.sh
 ADD amavisd/amavisd_init.sh /usr/local/bin/amavisd_init.sh
 ADD opendkim/opendkim.sh /usr/local/bin/opendkim.sh
 
-RUN chmod +x /usr/local/bin/run /usr/local/bin/postfix.sh /usr/local/bin/clamav_init.sh /usr/local/bin/amavisd_init.sh
+RUN chmod +x /usr/local/bin/run /usr/local/bin/postfix.sh /usr/local/bin/clamav_init.sh /usr/local/bin/amavisd_init.sh /usr/local/bin/opendkim.sh
 
 EXPOSE 587 25 465 4190 995 993 110 143
 VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/sympa.conf", "/home/sympa/list_data", "/home/sympa/arc", "/etc/wwsympa.conf"]

@@ -101,6 +101,7 @@ ADD run /usr/local/bin/run
 ADD postfix/bin/postfix.sh /usr/local/bin/postfix.sh
 ADD clamav/clamav_init.sh /usr/local/bin/clamav_init.sh
 ADD amavisd/amavisd_init.sh /usr/local/bin/amavisd_init.sh
+ADD opendkim/opendkim.sh /usr/local/bin/opendkim.sh
 
 RUN chmod +x /usr/local/bin/run /usr/local/bin/postfix.sh /usr/local/bin/clamav_init.sh /usr/local/bin/amavisd_init.sh
 

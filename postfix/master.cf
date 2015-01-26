@@ -157,3 +157,8 @@ dovecot   unix  -       n       n       -       -       pipe
 
 procmail unix - n n - - pipe
   flags=R user=vmail argv=/usr/bin/procmail -t -m USER=${user} DOMAIN=${nexthop} /etc/procmailrc
+
+sympa unix - n n - - pipe
+        flags=R user=sympa argv=/home/sympa/bin/queue ${recipient}
+sympabounce unix - n n - - pipe
+        flags=R user=sympa argv=/home/sympa/bin/bouncequeue ${recipient}

@@ -56,6 +56,7 @@ ADD postfix/master.cf /etc/postfix/master.cf
 ADD postfix/mysql-virtual-mailbox-maps.cf /etc/postfix/mysql-virtual-mailbox-maps.cf
 ADD postfix/mysql-virtual-alias-maps.cf   /etc/postfix/mysql-virtual-alias-maps.cf 
 ADD postfix/mysql-virtual-domains-maps.cf /etc/postfix/mysql-virtual-domains-maps.cf
+ADD postfix/transport_regexp /etc/postfix/transport_regexp
 
 # Dovecot
 ADD dovecot/sieve /etc/dovecot/sieve
@@ -104,6 +105,6 @@ ADD sympa/sympa.sh /usr/local/bin/sympa.sh
 RUN chmod +x /usr/local/bin/run /usr/local/bin/postfix.sh /usr/local/bin/clamav_init.sh /usr/local/bin/amavisd_init.sh /usr/local/bin/opendkim.sh /usr/local/bin/sympa.sh
 
 EXPOSE 587 25 465 4190 995 993 110 143
-VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/sympa.conf", "/home/sympa/list_data", "/home/sympa/arc", "/etc/wwsympa.conf"]
+VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/sympa.conf", "/home/sympa/list_data", "/home/sympa/arc", "/etc/wwsympa.conf" , "/etc/mail/sympa_aliases", "/etc/mail/sympa_aliases.db"]
 
 CMD ["/usr/local/bin/run"]

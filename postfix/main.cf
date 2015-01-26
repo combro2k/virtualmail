@@ -86,6 +86,7 @@ smtpd_sasl_path = private/auth
 # mappings
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
+transport_maps = regexp:/etc/postfix/transport_regexp
 
 # virtual setup
 dovecot_destination_recipient_limit = 1

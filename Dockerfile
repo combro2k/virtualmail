@@ -95,7 +95,8 @@ RUN mkdir -p /usr/src/sympa && \
     chown -R sympa:sympa /home/sympa && \
     locale-gen en_US en_US.UTF-8 nl_NL nl_NL.UTF-8 && \
     sed -i 's#www-data#sympa#g' /etc/init.d/fcgiwrap && \
-    sed -i 's#user  nginx;#user  sympa;#g' /etc/nginx/nginx.conf
+    sed -i 's#user  nginx;#user  sympa;#g' /etc/nginx/nginx.conf && \
+    rm /etc/nginx/conf.d/*.conf
 
 ADD run /usr/local/bin/run
 ADD postfix/bin/postfix.sh /usr/local/bin/postfix.sh

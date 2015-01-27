@@ -13,7 +13,7 @@ RUN bash -c 'debconf-set-selections <<< "postfix postfix/main_mailer_type string
 
 RUN apt-get install -yq \
     libberkeleydb-perl libnet-dns-perl libnet-server-perl libnet-rblclient-perl \
-    postfix postfix-mysql postgrey rsyslog \
+    postfix postfix-mysql postgrey rsyslog postfix-pcre \
     dovecot-core dovecot-imapd dovecot-managesieved dovecot-mysql dovecot-pop3d dovecot-sieve \
     cron amavisd-new spamassassin clamav-daemon \
     pyzor razor libencode-detect-perl libdbi-perl libdbd-mysql-perl \

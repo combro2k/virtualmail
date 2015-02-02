@@ -81,6 +81,9 @@ ADD opendkim/KeyTable /etc/opendkim/KeyTable
 ADD opendkim/SigningTable /etc/opendkim/SigningTable
 ADD opendkim/TrustedHosts /etc/opendkim/TrustedHosts
 
+# SPF Policyd
+ADD policy-spf/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
+
 # Sympa
 RUN mkdir -p /usr/src/sympa && \
     cd /usr/src/sympa && \

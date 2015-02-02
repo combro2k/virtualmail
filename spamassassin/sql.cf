@@ -1,0 +1,4 @@
+user_scores_dsn                  DBI:mysql:postfix:__REPLACE_DATABASE_HOST__:__REPLACE_DATABASE_PORT__
+user_scores_sql_password         __REPLACE_DATABASE_PASSWORD__
+user_scores_sql_username         postfix
+user_scores_sql_custom_query     SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '$GLOBAL' OR username = CONCAT('%',_DOMAIN_) ORDER BY username ASC

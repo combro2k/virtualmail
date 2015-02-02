@@ -39,6 +39,7 @@ RUN adduser clamav amavis && \
     sed -i "s/Foreground false/Foreground true/g" /etc/clamav/freshclam.conf && /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
 
 # Spamassassin
+ADD spamassassin/sql.cf /etc/spamassassin/sql.cf
 RUN sed -i "s/ENABLED\=0/ENABLED=1/g" /etc/default/spamassassin && \
     sed -i "s/CRON\=0/CRON=1/g" /etc/default/spamassassin && \
     echo "normalize_charset 1" >> /etc/mail/spamassassin/local.cf  && \

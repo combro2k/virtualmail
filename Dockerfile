@@ -96,7 +96,7 @@ ADD policy-spf/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
 # OpenDMARC
 RUN mkdir -p /usr/src/opendmarc && \
     cd /usr/src/opendmarc && \
-    curl http://sourceforge.net/projects/opendmarc/files/latest/download | tar zxv --strip-components=1 && \
+    curl -L http://sourceforge.net/projects/opendmarc/files/latest/download | tar zxv --strip-components=1 && \
     ./configure --prefix=/usr && \
     make && \
     make install && \

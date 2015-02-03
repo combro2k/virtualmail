@@ -26,7 +26,7 @@ RUN apt-get install -yq \
     libterm-progressbar-perl libintl-perl libauthcas-perl libcrypt-ciphersaber-perl \
     libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl \
     libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl postfix-policyd-spf-python \
-    libmail-spf-perl libmail-spf-xs-perl opendmarc
+    libmail-spf-perl libmail-spf-xs-perl libmilter-dev
 
 RUN groupadd -g 1000 vmail && \
     useradd -g vmail -u 1000 vmail -d /var/vmail && \
@@ -94,7 +94,14 @@ ADD opendkim/TrustedHosts /etc/opendkim/TrustedHosts
 ADD policy-spf/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
 
 # OpenDMARC
-RUN sed -i 's/#DAEMON_OPTS=""/DAEMON_OPTS="-f"/g' /etc/default/opendmarc && \
+RUN mkdir -p /usr/src/opendmarc && \
+    cd /usr/src/opendmarc && \
+    curl http://sourceforge.net/projects/opendmarc/files/latest/download | curl --strip-components=1 && \
+    ./configure --prefix=/usr && \
+    make && \
+    make install && \
+    touch /etc/opendmarc.conf && \
+    sed -i 's/#DAEMON_OPTS=""/DAEMON_OPTS="-f"/g' /etc/default/opendmarc && \
     sed -i 's/# Socket inet:8893@localhost/Socket inet:8893@localhost/g' /etc/opendmarc.conf && \
     sed -i 's/# Syslog false/Syslog true/g' /etc/opendmarc.conf
 

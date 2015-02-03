@@ -100,10 +100,8 @@ RUN mkdir -p /usr/src/opendmarc && \
     ./configure --prefix=/usr && \
     make && \
     make install && \
-    touch /etc/opendmarc.conf && \
-    sed -i 's/#DAEMON_OPTS=""/DAEMON_OPTS="-f"/g' /etc/default/opendmarc && \
-    sed -i 's/# Socket inet:8893@localhost/Socket inet:8893@localhost/g' /etc/opendmarc.conf && \
-    sed -i 's/# Syslog false/Syslog true/g' /etc/opendmarc.conf
+    echo 'inet:8893@localhost' >> /etc/opendmarc.conf && \
+    echo 'Syslog true' >> /etc/opendmarc.conf
 
 # Sympa
 RUN mkdir -p /usr/src/sympa && \

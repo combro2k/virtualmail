@@ -25,7 +25,8 @@ RUN apt-get install -yq \
     libmime-types-perl libnet-netmask-perl libtemplate-perl \
     libterm-progressbar-perl libintl-perl libauthcas-perl libcrypt-ciphersaber-perl \
     libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl \
-    libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl postfix-policyd-spf-python
+    libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl postfix-policyd-spf-python \
+    libmail-spf-perl libmail-spf-xs-perl
 
 RUN groupadd -g 1000 vmail && \
     useradd -g vmail -u 1000 vmail -d /var/vmail && \
@@ -43,7 +44,8 @@ ADD spamassassin/sql.cf /etc/spamassassin/sql.cf
 RUN sed -i "s/ENABLED\=0/ENABLED=1/g" /etc/default/spamassassin && \
     sed -i "s/CRON\=0/CRON=1/g" /etc/default/spamassassin && \
     echo "normalize_charset 1" >> /etc/mail/spamassassin/local.cf  && \
-    echo "report_safe 0" >> /etc/mail/spamassassin/local.cf
+    echo "report_safe 0" >> /etc/mail/spamassassin/local.cf && \
+    cpan -f install Mail::SPF::Query
 
 # Amavisd-new
 ADD amavisd/50-user /etc/amavis/conf.d/50-user

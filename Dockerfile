@@ -45,6 +45,12 @@ RUN sed -i "s/ENABLED\=0/ENABLED=1/g" /etc/default/spamassassin && \
     sed -i "s/CRON\=0/CRON=1/g" /etc/default/spamassassin && \
     echo "normalize_charset 1" >> /etc/mail/spamassassin/local.cf  && \
     echo "report_safe 0" >> /etc/mail/spamassassin/local.cf && \
+    echo "score SPF_PASS -0.001 " >> /etc/mail/spamassassin/local.cf && \
+    echo "score SPF_FAIL 0 0 0 0.875 " >> /etc/mail/spamassassin/local.cf && \
+    echo "score SPF_SOFTFAIL 0.500 0.842 0.500 0.500 " >> /etc/mail/spamassassin/local.cf && \
+    echo "score SPF_HELO_PASS -0.001 " >> /etc/mail/spamassassin/local.cf && \
+    echo "score SPF_HELO_FAIL 0 0.405 0 0.001 " >> /etc/mail/spamassassin/local.cf && \
+    echo "score SPF_HELO_SOFTFAIL 0 1.002 0 3.140 " >> /etc/mail/spamassassin/local.cf && \
     cpan -f install Mail::SPF::Query
 
 # Amavisd-new

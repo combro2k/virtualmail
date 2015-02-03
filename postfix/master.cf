@@ -91,7 +91,7 @@ smtp-amavis     unix    -       -       -       -       2       smtp
     -o receive_override_options=no_header_body_checks,no_unknown_recipient_checks
     -o milter_protocol=2
     -o milter_default_action=accept
-    -o smtpd_milters=inet:[127.0.0.1]:12301
+    -o smtpd_milters=inet:[127.0.0.1]:12301,inet:[127.0.0.1]:8893
     -o non_smtpd_milters=$smtpd_milters
 
 dovecot   unix  -       n       n       -       -       pipe

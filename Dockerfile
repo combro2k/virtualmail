@@ -93,6 +93,9 @@ ADD opendkim/TrustedHosts /etc/opendkim/TrustedHosts
 # SPF Policyd
 ADD policy-spf/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
 
+# OpenDMARC
+RUN sed -i 's/#DAEMON_OPTS=""/DAEMON_OPTS="-f"/g' /etc/default/opendmarc
+
 # Sympa
 RUN mkdir -p /usr/src/sympa && \
     cd /usr/src/sympa && \

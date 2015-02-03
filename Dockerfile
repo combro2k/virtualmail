@@ -100,8 +100,9 @@ RUN mkdir -p /usr/src/opendmarc && \
     ./configure --prefix=/usr && \
     make && \
     make install && \
-    echo 'inet:8893@localhost' >> /etc/opendmarc.conf && \
-    echo 'Syslog true' >> /etc/opendmarc.conf
+    echo 'Socket inet:8893@localhost' >> /etc/opendmarc.conf && \
+    echo 'Syslog true' >> /etc/opendmarc.conf && \
+    useradd opendmarc
 
 # Sympa
 RUN mkdir -p /usr/src/sympa && \

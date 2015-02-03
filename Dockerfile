@@ -95,7 +95,8 @@ ADD policy-spf/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
 
 # OpenDMARC
 RUN sed -i 's/#DAEMON_OPTS=""/DAEMON_OPTS="-f"/g' /etc/default/opendmarc && \
-    sed -i 's/# Socket inet:8893@localhost/Socket inet:8893@localhost/g' /etc/opendmarc.conf
+    sed -i 's/# Socket inet:8893@localhost/Socket inet:8893@localhost/g' /etc/opendmarc.conf && \
+    sed -i 's/# Syslog false/Syslog true/g' /etc/opendmarc.conf
 
 # Sympa
 RUN mkdir -p /usr/src/sympa && \

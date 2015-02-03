@@ -1,3 +1,3 @@
 #!/bin/bash
 
-/etc/init.d/opendmarc start
+/usr/sbin/opendmarc -c /etc/opendmarc.conf -u opendmarc -P /var/run/opendmarc/opendmarc.pid -f

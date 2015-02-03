@@ -108,7 +108,7 @@ RUN mkdir -p /usr/src/sympa && \
 ADD sympa/sympa-nginx.conf /etc/nginx/conf.d/sympa-nginx.conf
 ADD sympa/sympa.conf /etc/sympa.conf
 
-ADD bin/* /usr/local/bin
+ADD bin/* /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/*
 

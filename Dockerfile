@@ -97,7 +97,7 @@ ADD policy-spf/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
 RUN mkdir -p /usr/src/opendmarc && \
     cd /usr/src/opendmarc && \
     curl -L http://sourceforge.net/projects/opendmarc/files/latest/download | tar zxv --strip-components=1 && \
-    ./configure --prefix=/usr && \
+    ./configure --prefix=/usr --with-spf --with-sql-backend && \
     make && \
     make install && \
     echo 'Socket inet:8893@localhost' >> /etc/opendmarc.conf && \

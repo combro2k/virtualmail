@@ -104,7 +104,9 @@ RUN mkdir -p /usr/src/opendmarc && \
     echo 'Syslog true' >> /etc/opendmarc.conf && \
     echo 'SPFSelfValidate true' >> /etc/opendmarc.conf && \
     echo 'SPFIgnoreResults true' >> /etc/opendmarc.conf && \
-    useradd opendmarc
+    useradd opendmarc && \
+    mkdir -p /var/run/opendmarc && \
+    chown -R opendmarc:opendmarc /var/run/opendmarc
 
 # Sympa
 RUN mkdir -p /usr/src/sympa && \

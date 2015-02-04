@@ -25,8 +25,8 @@ RUN apt-get install -yq \
     libmime-types-perl libnet-netmask-perl libtemplate-perl \
     libterm-progressbar-perl libintl-perl libauthcas-perl libcrypt-ciphersaber-perl \
     libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl \
-    libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl postfix-policyd-spf-python \
-    libmail-spf-perl libmail-spf-xs-perl libmilter-dev
+    libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl libmail-spf-perl \
+    libmail-spf-xs-perl libmilter-dev
 
 RUN groupadd -g 1000 vmail && \
     useradd -g vmail -u 1000 vmail -d /var/vmail && \
@@ -91,7 +91,7 @@ ADD opendkim/SigningTable /etc/opendkim/SigningTable
 ADD opendkim/TrustedHosts /etc/opendkim/TrustedHosts
 
 # SPF Policyd
-ADD policy-spf/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
+# ADD policy-spf/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
 
 # OpenDMARC
 RUN mkdir -p /usr/src/opendmarc && \
@@ -102,6 +102,8 @@ RUN mkdir -p /usr/src/opendmarc && \
     make install && \
     echo 'Socket inet:8893@localhost' >> /etc/opendmarc.conf && \
     echo 'Syslog true' >> /etc/opendmarc.conf && \
+    echo 'SPFSelfValidate true' >> /etc/opendmarc.conf && \
+    echo 'SPFIgnoreResults true' >> /etc/opendmarc.conf && \
     useradd opendmarc
 
 # Sympa

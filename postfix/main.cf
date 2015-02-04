@@ -72,6 +72,7 @@ smtpd_recipient_restrictions = permit_sasl_authenticated,
   reject_rbl_client b.barracudacentral.org,
   reject_rbl_client psbl.surriel.com,
   reject_rbl_client ix.dnsbl.manitu.net,
+  check_policy_service unix:private/policy-spf,
   check_policy_service unix:postgrey/socket,
   permit
 
@@ -100,4 +101,4 @@ virtual_transport = dovecot
 virtual_uid_maps = static:1000
 
 content_filter=smtp-amavis:[127.0.0.1]:10024
-#policy-spf_time_limit=3600s
+policy-spf_time_limit=3600s

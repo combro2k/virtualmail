@@ -102,3 +102,6 @@ sympa unix - n n - - pipe
 
 sympabounce unix - n n - - pipe
     flags=R user=sympa argv=/home/sympa/bin/bouncequeue ${recipient}
+
+policy-spf  unix  -       n       n       -       -       spawn
+    user=nobody argv=/usr/bin/policyd-spf

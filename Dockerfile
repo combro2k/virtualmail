@@ -26,7 +26,7 @@ RUN apt-get install -yq \
     libterm-progressbar-perl libintl-perl libauthcas-perl libcrypt-ciphersaber-perl \
     libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl \
     libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl libmail-spf-perl \
-    libmail-spf-xs-perl libmilter-dev
+    libmail-spf-xs-perl libmilter-dev postfix-policyd-spf-python
 
 RUN groupadd -g 1000 vmail && \
     useradd -g vmail -u 1000 vmail -d /var/vmail && \
@@ -91,7 +91,7 @@ ADD opendkim/SigningTable /etc/opendkim/SigningTable
 ADD opendkim/TrustedHosts /etc/opendkim/TrustedHosts
 
 # SPF Policyd
-# ADD policy-spf/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
+ADD policy-spf/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
 
 # OpenDMARC
 RUN mkdir -p /usr/src/opendmarc && \

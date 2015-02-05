@@ -105,6 +105,7 @@ RUN mkdir -p /usr/src/opendmarc && \
     echo 'SPFSelfValidate true' >> /etc/opendmarc.conf && \
     echo 'SPFIgnoreResults false' >> /etc/opendmarc.conf && \
     echo 'TrustedAuthservIDs mail.example.org' >> /etc/opendmarc.conf && \
+    echo 'AuthservID mail.example.org' >> /etc/opendmarc.conf && \
     useradd opendmarc && \
     mkdir -p /var/run/opendmarc && \
     chown -R opendmarc:opendmarc /var/run/opendmarc

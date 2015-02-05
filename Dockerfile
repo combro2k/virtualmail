@@ -9,7 +9,7 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 &&
 RUN apt-get update && apt-get dist-upgrade -yq
 
 RUN bash -c 'debconf-set-selections <<< "postfix postfix/main_mailer_type string Internet site"' && \
-    bash -c 'debconf-set-selections <<< "postfix postfix/mailname string mail.example.com"'
+    bash -c 'debconf-set-selections <<< "postfix postfix/mailname string mail.example.org"'
 
 RUN apt-get install -yq \
     libberkeleydb-perl libnet-dns-perl libnet-server-perl libnet-rblclient-perl \

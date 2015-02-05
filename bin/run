@@ -51,6 +51,7 @@ sed -i "s/__REPLACE_DATABASE_PASSWORD__/${POSTFIX_MYSQL_PASSWORD}/g" /etc/spamas
 
 sed -i "s/mail.example.org/${HOSTNAME}/g" /etc/postfix-policyd-spf-python/policyd-spf.conf
 sed -i "s/mail.example.org/${HOSTNAME}/g" /etc/opendmarc.conf
+sed -i "s/mail.example.org/${HOSTNAME}/g" /etc/opendkim.conf
 
 sed -i "s/mail.example.org/${HOSTNAME}/g" /etc/mailname
 

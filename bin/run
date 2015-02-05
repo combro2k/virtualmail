@@ -13,6 +13,16 @@ if [ ! -z "$IPV6GW" ]; then
         ip -6 route add  default via "$IPV6GW" dev eth0
 fi
 
+if [[ -f "/var/run/dovecot/master.pid" ]]
+then
+    rm /var/run/dovecot/master.pid
+fi
+
+if [[ -f "/var/run/rsyslogd.pid" ]]
+then
+    rm /var/run/rsyslogd.pid
+fi
+
 sed -i "s/__REPLACE_DATABASE_HOST__/${MYSQL_PORT_3306_TCP_ADDR}/g" /etc/postfix/mysql-virtual-alias-maps.cf
 sed -i "s/__REPLACE_DATABASE_PORT__/${MYSQL_PORT_3306_TCP_PORT}/g" /etc/postfix/mysql-virtual-alias-maps.cf
 sed -i "s/__REPLACE_DATABASE_PASSWORD__/${POSTFIX_MYSQL_PASSWORD}/g" /etc/postfix/mysql-virtual-alias-maps.cf
@@ -37,6 +47,10 @@ sed -i "s/__REPLACE_DATABASE_PASSWORD__/${POSTFIX_MYSQL_PASSWORD}/g" /etc/doveco
 sed -i "s/__REPLACE_DATABASE_HOST__/${MYSQL_PORT_3306_TCP_ADDR}/g" /etc/spamassassin/sql.cf
 sed -i "s/__REPLACE_DATABASE_PORT__/${MYSQL_PORT_3306_TCP_PORT}/g" /etc/spamassassin/sql.cf
 sed -i "s/__REPLACE_DATABASE_PASSWORD__/${POSTFIX_MYSQL_PASSWORD}/g" /etc/spamassassin/sql.cf
+
+
+sed -i "s/mail.example.org/${HOSTNAME}/g" /etc/postfix-policyd-spf-python/policyd-spf.conf
+sed -i "s/mail.example.org/${HOSTNAME}/g" /etc/opendmarc.conf
 
 sed -i "s/mail.example.com/${HOSTNAME}/g" /etc/mailname
 

@@ -103,7 +103,8 @@ RUN mkdir -p /usr/src/opendmarc && \
     echo 'Socket inet:8893@localhost' >> /etc/opendmarc.conf && \
     echo 'Syslog true' >> /etc/opendmarc.conf && \
     echo 'SPFSelfValidate true' >> /etc/opendmarc.conf && \
-    echo 'SPFIgnoreResults true' >> /etc/opendmarc.conf && \
+    echo 'SPFIgnoreResults false' >> /etc/opendmarc.conf && \
+    echo 'TrustedAuthservIDs mail.example.org' >> /etc/opendmarc.conf && \
     useradd opendmarc && \
     mkdir -p /var/run/opendmarc && \
     chown -R opendmarc:opendmarc /var/run/opendmarc

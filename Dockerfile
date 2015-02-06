@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu-debootstrap:14.04
 MAINTAINER Martijn van Maurik <docker@vmaurik.nl>
 
 ENV DEBIAN_FRONTEND noninteractive

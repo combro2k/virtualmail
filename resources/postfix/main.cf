@@ -102,3 +102,4 @@ virtual_uid_maps = static:1000
 
 content_filter=smtp-amavis:[127.0.0.1]:10024
 policy-spf_time_limit=3600s
+inet_protocols=all

@@ -93,8 +93,9 @@ RUN chown -R vmail:vmail /etc/dovecot/sieve
 ADD resources/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
 
 # Postgrey
-RUN useradd postgrey && chown -R postgrey:nogroup /var/spool/postfix/postgrey && \
+RUN useradd postgrey && \
     mkdir -p /var/spool/postfix/postgrey && mkdir -p /etc/postgrey && \
+    chown -R postgrey:nogroup /var/spool/postfix/postgrey && \
     mkdir -p /usr/src/build/postgrey && cd /usr/src/build/postgrey && \
     curl http://postgrey.schweikert.ch/pub/postgrey-1.35.tar.gz | tar zxv --strip-components=1 && \
     cp postgrey /usr/sbin/postgrey && cp policy-test /usr/sbin/policy-test && \

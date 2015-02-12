@@ -51,3 +51,6 @@ A summary of this container: “The virtualmail container deploys and configures
  - /etc/sympa.conf # configuration for sympa
  - /etc/opendmarc # OpenDMARC configuration
  
+### Build env
+You can extract all used source by going to /usr/src/, and untarring the source file:
+- cd /usr/src && tar zxvf build.tgz --strip-components=2

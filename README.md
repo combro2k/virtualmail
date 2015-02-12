@@ -3,6 +3,8 @@ virtualmail
 
 Virtualmail on Docker.
 
+A summary of this container: “The virtualmail container deploys and configures everything you need to provide email hosting. The container includes software for POP3 and IMAP, spam filtering, antivirus, and email groups (via a listserv).” - Thanks @timbert for pointing it out
+
 ## Requirement
 
 -   MySQL
@@ -46,7 +48,6 @@ Virtualmail on Docker.
  - /etc/opendkim # configuration for opendkim
  - /home/sympa/list_data # data storage for sympa mailinglist
  - /home/sympa/arc # archives for sympa mailinglist
- 
  - /etc/sympa.conf # configuration for sympa
- - 
+ - /etc/opendmarc # OpenDMARC configuration
  

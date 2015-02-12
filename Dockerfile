@@ -14,6 +14,7 @@ ENV PYPOLICYD_SPF_MAIN 1.3
 ENV PYPOLICYD_SPF_VERSION 1.3.1
 ENV CLAMAV_VERSION 0.98.6
 ENV AMAVISD_NEW_VERSION 2.10.1
+ENV AMAVISD_DB_HOME /var/lib/amavis/db
 
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
     echo deb http://nginx.org/packages/mainline/ubuntu trusty nginx > /etc/apt/sources.list.d/nginx-stable-trusty.list && \
@@ -43,7 +44,7 @@ RUN addgroup clamav && addgroup amavis && \
     chown -R clamav:clamav /var/run/clamav /var/lib/clamav /var/log/clamav && \
     mkdir -p /usr/src/build/clamav && cd /usr/src/build/clamav && \
     curl -L http://sourceforge.net/projects/clamav/files/clamav/${CLAMAV_VERSION}/clamav-${CLAMAV_VERSION}.tar.gz/download | tar zxv --strip-components=1 && \
-    ./configure --prefix=/usr --sysconfdir=/etc && make && make install
+    ./configure --prefix=/usr --sysconfdir=/etc --with-working-dir=/var/lib/amavis && make && make install
 
 ADD resources/clamav /etc/clamav
 RUN /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
@@ -59,10 +60,18 @@ RUN mkdir -p /var/run/amavis /var/lib/amavis/tmp /var/lib/amavis/db /var/lib/ama
     chmod -R 770 /var/lib/amavis && chown -R 770 /var/lib/amavis/tmp && \
     mkdir -p /usr/src/build/amavisd-new && cd /usr/src/build/amavisd-new && \
     curl http://mirror.omroep.nl/amavisd-new/amavisd-new-${AMAVISD_NEW_VERSION}.tar.xz | tar Jxv --strip-components=1 && \
-    cp amavisd /usr/sbin/amavisd-new && chown root:root /usr/sbin/amavisd-new && chmod 755 /usr/sbin/amavisd-new
+    cp amavisd /usr/sbin/amavisd-new && chown root:root /usr/sbin/amavisd-new && chmod 755 /usr/sbin/amavisd-new && \
+    cp amavisd-nanny /usr/sbin/amavisd-nanny && chown root:root /usr/sbin/amavisd-nanny && chmod 755 /usr/sbin/amavisd-nanny && \
+    cp amavisd-release /usr/sbin/amavisd-release && chown root:root /usr/sbin/amavisd-release && chmod 755 /usr/sbin/amavisd-release && \
+    cp amavisd-submit /usr/sbin/amavisd-submit && chown root:root /usr/sbin/amavisd-submit && chmod 755 /usr/sbin/amavisd-submit
 
 ADD resources/amavis /etc/amavis
 RUN chown root:root /etc/amavis -R
+
+# Amavisd-milter
+RUN mkdir -p /usr/src/build/amavisd-milter && cd /usr/src/build/amavisd-milter && \
+    curl -L http://sourceforge.net/projects/amavisd-milter/files/latest/download | tar zxv --strip-components=1 && \
+    ./configure --with-working-dir=/var/lib/amavis/tmp --prefix=/usr && make && make install
 
 # Postfix 3.0.0
 RUN mkdir -p /usr/src/build/postfix && cd /usr/src/build/postfix && \
@@ -146,9 +155,11 @@ ADD bin/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*
 
 # Cleanup build env
-RUN tar czvf /usr/src/build.tgz /usr/src/build --remove-files
+#RUN tar czvf /usr/src/build.tgz /usr/src/build --remove-files
 
 EXPOSE 587 25 465 4190 995 993 110 143
 VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/opendmarc", "/home/sympa/list_data", "/home/sympa/arc"]
+
+WORKDIR /
 
 CMD ["/usr/local/bin/run"]

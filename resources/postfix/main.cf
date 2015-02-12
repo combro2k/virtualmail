@@ -100,6 +100,8 @@ virtual_minimum_uid = 1000
 virtual_transport = dovecot
 virtual_uid_maps = static:1000
 
-content_filter=smtp-amavis:[127.0.0.1]:10024
 policy-spf_time_limit=3600s
 inet_protocols=all
+
+smtpd_milters=unix:/var/lib/amavis/amavisd-milter.sock,inet:[127.0.0.1]:12301,inet:[127.0.0.1]:8893
+non_smtpd_milters=$smtpd_milters

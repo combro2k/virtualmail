@@ -14,6 +14,8 @@ ENV PYPOLICYD_SPF_MAIN 1.3
 ENV PYPOLICYD_SPF_VERSION 1.3.1
 ENV CLAMAV_VERSION 0.98.6
 ENV AMAVISD_NEW_VERSION 2.10.1
+ENV GREYLIST_VERSION 4.4.3
+
 ENV AMAVISD_DB_HOME /var/lib/amavis/db
 
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
@@ -25,13 +27,13 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 &&
     arj cabextract cpio nomarch pax unzip zip supervisor curl \
     libxml-libxml-perl libhtml-stripscripts-parser-perl \
     libfile-copy-recursive-perl libdist-zilla-localetextdomain-perl \
-    libmime-charset-perl libmime-encwords-perl libmime-lite-html-perl \
-    libmime-types-perl libnet-netmask-perl libtemplate-perl \
+    libmime-charset-perl libmime-encwords-perl libmime-lite-html-perl libcurl4-openssl-dev libcurlpp-dev \
+    libmime-types-perl libnet-netmask-perl libtemplate-perl flex libbind-dev libgeoip-dev \
     libterm-progressbar-perl libintl-perl libauthcas-perl libcrypt-ciphersaber-perl \
-    libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl \
-    libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl libmail-spf-perl \
+    libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl libspf2-dev \
+    libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl libmail-spf-perl libpthread-stubs0-dev \
     libmail-spf-xs-perl libmilter-dev libpcre3-dev libssl-dev libbsd-dev ssl-cert python3-pip \
-    libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl && \
+    libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc && \
     groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail && \
     mkdir /var/vmail && chown vmail:vmail /var/vmail
 
@@ -47,7 +49,7 @@ RUN addgroup clamav && addgroup amavis && \
     ./configure --prefix=/usr --sysconfdir=/etc --with-working-dir=/var/lib/amavis && make && make install
 
 ADD resources/clamav /etc/clamav
-RUN /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
+#RUN /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
 
 # Spamassassin
 ADD resources/spamassassin /etc/spamassassin
@@ -101,14 +103,23 @@ RUN chown -R vmail:vmail /etc/dovecot/sieve
 # Supervisor
 ADD resources/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
 
-# Postgrey
-RUN useradd postgrey && \
-    mkdir -p /var/spool/postfix/postgrey && mkdir -p /etc/postgrey && \
-    chown -R postgrey:nogroup /var/spool/postfix/postgrey && \
-    mkdir -p /usr/src/build/postgrey && cd /usr/src/build/postgrey && \
-    curl http://postgrey.schweikert.ch/pub/postgrey-1.35.tar.gz | tar zxv --strip-components=1 && \
-    cp postgrey /usr/sbin/postgrey && cp policy-test /usr/sbin/policy-test && \
-    cp postgrey_whitelist_clients /etc/postgrey/postgrey_whitelist_clients && cp postgrey_whitelist_recipients /etc/postgrey/postgrey_whitelist_recipients
+# Greylist
+RUN mkdir -p /usr/src/build/greylist && cd /usr/src/build/greylist && \
+    curl ftp://ftp.espci.fr/pub/milter-greylist/milter-greylist-${GREYLIST_VERSION}.tgz | tar zxv --strip-components=1 && \
+    LDFLAGS="-L/usr/lib/libmilter" CFLAGS="-I/usr/include/libmilter" \
+    ./configure \
+        --enable-dnsrbl \
+        --prefix=/usr \
+        --enable-postfix \
+        --with-user=postfix \
+        --with-conffile=/etc/greylist/greylist.conf \
+        --with-dumpfile=/etc/greylist/greylist.db \
+        --with-libcurl \
+        --with-libspf2 && \
+    make && make install && \
+    mkdir -p /var/spool/postfix/milter-greylist/ && chown -R postfix:postfix /var/spool/postfix/milter-greylist/
+
+ADD resources/greylist /etc/greylist
 
 # OpenDKIM
 RUN useradd opendkim && \
@@ -149,6 +160,14 @@ RUN mkdir -p /usr/src/build/sympa && cd /usr/src/build/sympa && \
 
 ADD resources/sympa/sympa-nginx.conf /etc/nginx/conf.d/sympa-nginx.conf
 ADD resources/sympa/sympa.conf /etc/sympa.conf
+
+# Milter Manager
+RUN mkdir -p /usr/src/build/milter-manager && cd /usr/src/build/milter-manager && \
+    curl -L http://sourceforge.net/projects/milter-manager/files/milter%20manager/2.0.5/milter-manager-2.0.5.tar.gz/download | tar zxv --strip-components=1 && \
+    ./configure --prefix=/usr --sysconfdir=/etc && make && make install && \
+    rm -fr /etc/milter-manager
+
+ADD resources/milter-manager /etc/milter-manager
 
 ADD bin/* /usr/local/bin/
 

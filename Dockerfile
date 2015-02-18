@@ -115,7 +115,11 @@ RUN mkdir -p /usr/src/build/greylist && cd /usr/src/build/greylist && \
         --with-conffile=/etc/greylist/greylist.conf \
         --with-dumpfile=/etc/greylist/greylist.db \
         --with-libcurl \
-        --with-libspf2 && \
+        --with-libspf2 \
+        --enable-drac \
+        --enable-spamassassin \
+        --enable-p0f \
+        --with-delay=5m && \
     make && make install && \
     mkdir -p /var/spool/postfix/milter-greylist/ && chown -R postfix:postfix /var/spool/postfix/milter-greylist/
 

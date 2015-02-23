@@ -184,6 +184,8 @@ RUN chmod +x /usr/local/bin/*
 
 # Cleanup build env
 #RUN tar czvf /usr/src/build.tgz /usr/src/build --remove-files
+RUN apt-get clean && \
+    rm -fr /var/lib/apt
 
 EXPOSE 587 25 465 4190 995 993 110 143
 VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/opendmarc", "/home/sympa/list_data", "/home/sympa/arc"]

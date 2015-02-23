@@ -18,7 +18,9 @@ ENV GREYLIST_VERSION 4.4.3
 
 ENV AMAVISD_DB_HOME /var/lib/amavis/db
 
-RUN echo 'deb http://download.bitdefender.com/repos/deb/ bitdefender non-free' > /etc/apt/sources.list.d/bitdefender.list && \
+RUN groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail && \
+    mkdir /var/vmail && chown vmail:vmail /var/vmail && \
+    echo 'deb http://download.bitdefender.com/repos/deb/ bitdefender non-free' > /etc/apt/sources.list.d/bitdefender.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A373FB480EC4FE05 && \
     echo deb http://nginx.org/packages/mainline/ubuntu trusty nginx > /etc/apt/sources.list.d/nginx-stable-trusty.list && \
@@ -27,7 +29,7 @@ RUN echo 'deb http://download.bitdefender.com/repos/deb/ bitdefender non-free' >
     rsyslog libdb-dev libmysqlclient-dev libmysqlclient18 cron xz-utils \
     pyzor razor libencode-detect-perl libdbi-perl libdbd-mysql-perl \
     arj cabextract cpio nomarch pax unzip zip supervisor curl \
-    libxml-libxml-perl libhtml-stripscripts-parser-perl \
+    libxml-libxml-perl libhtml-stripscripts-parser-perl bitdefender-scanner\
     libfile-copy-recursive-perl libdist-zilla-localetextdomain-perl \
     libmime-charset-perl libmime-encwords-perl libmime-lite-html-perl libcurl4-openssl-dev libcurlpp-dev \
     libmime-types-perl libnet-netmask-perl libtemplate-perl flex libbind-dev libgeoip-dev \
@@ -36,8 +38,6 @@ RUN echo 'deb http://download.bitdefender.com/repos/deb/ bitdefender non-free' >
     libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl libmail-spf-perl libpthread-stubs0-dev \
     libmail-spf-xs-perl libmilter-dev libpcre3-dev libssl-dev libbsd-dev ssl-cert python3-pip \
     libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc && \
-    groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail && \
-    mkdir /var/vmail && chown vmail:vmail /var/vmail
 
 # ClamAV
 RUN addgroup clamav && addgroup amavis && \
@@ -51,8 +51,7 @@ RUN addgroup clamav && addgroup amavis && \
     ./configure --prefix=/usr --sysconfdir=/etc --with-working-dir=/var/lib/amavis && make && make install
 
 # Bitdefender
-RUN apt-get install bitdefender-scanner && \
-    echo 'LicenseAccepted = True' >> /opt/BitDefender-scanner/etc/bdscan.conf
+RUN echo 'LicenseAccepted = True' >> /opt/BitDefender-scanner/etc/bdscan.conf
 
 ADD resources/clamav /etc/clamav
 RUN /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf

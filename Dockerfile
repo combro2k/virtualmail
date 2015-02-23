@@ -35,8 +35,8 @@ RUN echo 'deb http://download.bitdefender.com/repos/deb/ bitdefender non-free' >
     libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl libspf2-dev \
     libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl libmail-spf-perl libpthread-stubs0-dev \
     libmail-spf-xs-perl libmilter-dev libpcre3-dev libssl-dev libbsd-dev ssl-cert python3-pip \
-    libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc && \
-    groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail bitdefender-scanner && \
+    libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc bitdefender-scanner && \
+    groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail && \
     mkdir /var/vmail && chown vmail:vmail /var/vmail
 
 # ClamAV

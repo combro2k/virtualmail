@@ -50,8 +50,11 @@ RUN addgroup clamav && addgroup amavis && \
     curl -L http://sourceforge.net/projects/clamav/files/clamav/${CLAMAV_VERSION}/clamav-${CLAMAV_VERSION}.tar.gz/download | tar zxv --strip-components=1 && \
     ./configure --prefix=/usr --sysconfdir=/etc --with-working-dir=/var/lib/amavis && make && make install
 
+# Bitdefender
+RUN echo 'LicenseAccepted = True' >> /opt/BitDefender-scanner/etc/bdscan.conf
+
 ADD resources/clamav /etc/clamav
-#RUN /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
+RUN /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
 
 # Spamassassin
 ADD resources/spamassassin /etc/spamassassin

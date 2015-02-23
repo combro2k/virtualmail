@@ -48,6 +48,12 @@ RUN addgroup clamav && addgroup amavis && \
     curl -L http://sourceforge.net/projects/clamav/files/clamav/${CLAMAV_VERSION}/clamav-${CLAMAV_VERSION}.tar.gz/download | tar zxv --strip-components=1 && \
     ./configure --prefix=/usr --sysconfdir=/etc --with-working-dir=/var/lib/amavis && make && make install
 
+# Bitdefender
+RUN curl  http://download.bitdefender.com/repos/deb/bd.key.asc | apt-key add - && \
+    echo 'deb http://download.bitdefender.com/repos/deb/ bitdefender non-free' > /etc/apt/sources.list.d/bitdefender.list && \
+    apt-get update && \
+    apt-get install bitdefender-scanner -yq
+
 ADD resources/clamav /etc/clamav
 #RUN /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
 

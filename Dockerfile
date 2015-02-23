@@ -18,7 +18,9 @@ ENV GREYLIST_VERSION 4.4.3
 
 ENV AMAVISD_DB_HOME /var/lib/amavis/db
 
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
+RUN echo 'deb http://download.bitdefender.com/repos/deb/ bitdefender non-free' > /etc/apt/sources.list.d/bitdefender.list && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A373FB480EC4FE05 && \
     echo deb http://nginx.org/packages/mainline/ubuntu trusty nginx > /etc/apt/sources.list.d/nginx-stable-trusty.list && \
     apt-get update && apt-get dist-upgrade -yq && apt-get install -yq \
     libberkeleydb-perl libnet-dns-perl libnet-server-perl libnet-rblclient-perl \
@@ -34,7 +36,7 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 &&
     libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl libmail-spf-perl libpthread-stubs0-dev \
     libmail-spf-xs-perl libmilter-dev libpcre3-dev libssl-dev libbsd-dev ssl-cert python3-pip \
     libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc && \
-    groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail && \
+    groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail bitdefender-scanner && \
     mkdir /var/vmail && chown vmail:vmail /var/vmail
 
 # ClamAV
@@ -47,12 +49,6 @@ RUN addgroup clamav && addgroup amavis && \
     mkdir -p /usr/src/build/clamav && cd /usr/src/build/clamav && \
     curl -L http://sourceforge.net/projects/clamav/files/clamav/${CLAMAV_VERSION}/clamav-${CLAMAV_VERSION}.tar.gz/download | tar zxv --strip-components=1 && \
     ./configure --prefix=/usr --sysconfdir=/etc --with-working-dir=/var/lib/amavis && make && make install
-
-# Bitdefender
-RUN curl  http://download.bitdefender.com/repos/deb/bd.key.asc | apt-key add - && \
-    echo 'deb http://download.bitdefender.com/repos/deb/ bitdefender non-free' > /etc/apt/sources.list.d/bitdefender.list && \
-    apt-get update && \
-    apt-get install bitdefender-scanner -yq
 
 ADD resources/clamav /etc/clamav
 #RUN /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf

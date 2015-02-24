@@ -37,7 +37,7 @@ RUN groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail && \
     libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl libspf2-dev \
     libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl libmail-spf-perl libpthread-stubs0-dev \
     libmail-spf-xs-perl libmilter-dev libpcre3-dev libssl-dev libbsd-dev ssl-cert python3-pip \
-    libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc
+    libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc libicu-dev
 
 # ClamAV
 RUN addgroup clamav && addgroup amavis && \
@@ -70,6 +70,7 @@ RUN mkdir -p /var/run/amavis /var/lib/amavis/tmp /var/lib/amavis/db /var/lib/ama
     cp amavisd /usr/sbin/amavisd-new && chown root:root /usr/sbin/amavisd-new && chmod 755 /usr/sbin/amavisd-new && \
     cp amavisd-nanny /usr/sbin/amavisd-nanny && chown root:root /usr/sbin/amavisd-nanny && chmod 755 /usr/sbin/amavisd-nanny && \
     cp amavisd-release /usr/sbin/amavisd-release && chown root:root /usr/sbin/amavisd-release && chmod 755 /usr/sbin/amavisd-release && \
+    sed -i 's#/var/amavis/amavisd.sock#/var/lib/amavis/amavisd.sock#g' /usr/sbin/amavisd-release && \
     cp amavisd-submit /usr/sbin/amavisd-submit && chown root:root /usr/sbin/amavisd-submit && chmod 755 /usr/sbin/amavisd-submit
 
 ADD resources/amavis /etc/amavis

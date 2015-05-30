@@ -126,7 +126,8 @@ RUN mkdir -p /usr/src/build/greylist && cd /usr/src/build/greylist && \
         --enable-p0f \
         --with-delay=600 && \
     make && make install && \
-    mkdir -p /var/spool/postfix/milter-greylist/ && chown -R postfix:postfix /var/spool/postfix/milter-greylist/
+    mkdir -p /var/spool/postfix/milter-greylist/ && chown -R postfix:postfix /var/spool/postfix/milter-greylist/ && \
+    mkdir -p /var/spool/postfix/greylist && chown -R postfix:postfix /var/spool/postfix/greylist
 
 ADD resources/greylist /etc/greylist
 

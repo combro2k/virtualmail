@@ -177,8 +177,8 @@ ADD bin/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*
 
 # Cleanup build env
-#RUN tar czvf /usr/src/build.tgz /usr/src/build --remove-files
-RUN apt-get clean && \
+RUN tar czvf build.tgz /usr/src/build --remove-files && \
+    apt-get clean && \
     rm -fr /var/lib/apt
 
 EXPOSE 587 25 465 4190 995 993 110 143

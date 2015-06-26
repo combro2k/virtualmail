@@ -8,7 +8,7 @@ ENV POSTFIX_VERSION 3.0.1
 ENV DOVECOT_MAIN 2.2
 ENV DOVECOT_VERSION 2.2.16
 ENV DOVECOT_PIGEONHOLE 0.4.6
-ENV SYMPA_VERSION 6.1.24
+ENV MAILMAN_VERSION 3.0.0
 ENV OPENDKIM_VERSION 2.10.1
 ENV PYPOLICYD_SPF_MAIN 1.3
 ENV PYPOLICYD_SPF_VERSION 1.3.1
@@ -156,19 +156,12 @@ RUN mkdir -p /usr/src/build/opendmarc && cd /usr/src/build/opendmarc && \
 
 ADD resources/opendmarc /etc/opendmarc
 
-# Sympa
-RUN mkdir -p /usr/src/build/sympa && cd /usr/src/build/sympa && \
-    curl http://www.sympa.org/distribution/sympa-${SYMPA_VERSION}.tar.gz | tar zxv --strip-components=1 && \
-    ./configure && make && make install && \
-    cpan -f install MHonArc::UTF8 Template::Stash::XS Text::LineFold && \
-    useradd sympa && chown -R sympa:sympa /home/sympa && \
-    locale-gen en_US en_US.UTF-8 nl_NL nl_NL.UTF-8 && \
-    sed -i 's#www-data#sympa#g' /etc/init.d/fcgiwrap && \
-    sed -i 's#user  nginx;#user  sympa;#g' /etc/nginx/nginx.conf && \
-    rm /etc/nginx/conf.d/*.conf
+# Mailman
+RUN pip3 install --install-option='--prefix=/usr' -Iv https://pypi.python.org/packages/source/m/mailman/mailman-${MAILMAN_VERSION}.tar.gz && \
+    mkdir -p /etc/mailman.d
 
-ADD resources/sympa/sympa-nginx.conf /etc/nginx/conf.d/sympa-nginx.conf
-ADD resources/sympa/sympa.conf /etc/sympa.conf
+ADD resources/mailman3/mailman.cfg /etc/mailman.cfg
+ADD resources/mailman3/mailman.d/* /etc/mailman.d/
 
 # Milter Manager
 RUN mkdir -p /usr/src/build/milter-manager && cd /usr/src/build/milter-manager && \

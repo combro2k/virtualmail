@@ -8,7 +8,6 @@ ENV POSTFIX_VERSION 3.0.1
 ENV DOVECOT_MAIN 2.2
 ENV DOVECOT_VERSION 2.2.18
 ENV DOVECOT_PIGEONHOLE 0.4.6
-ENV MAILMAN_VERSION 3.0.0
 ENV OPENDKIM_VERSION 2.10.3
 ENV PYPOLICYD_SPF_MAIN 1.3
 ENV PYPOLICYD_SPF_VERSION 1.3.1
@@ -158,7 +157,7 @@ RUN mkdir -p /usr/src/build/opendmarc && cd /usr/src/build/opendmarc && \
 ADD resources/opendmarc /etc/opendmarc
 
 # Mailman
-RUN pip3 install --install-option='--prefix=/usr' -Iv https://pypi.python.org/packages/source/m/mailman/mailman-${MAILMAN_VERSION}.tar.gz && \
+RUN pip install mailman mailman-bundler && \
     mkdir -p /etc/mailman.d
 
 ADD resources/mailman3/mailman.cfg /etc/mailman.cfg

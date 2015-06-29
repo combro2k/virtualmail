@@ -8,7 +8,7 @@ trap "{ echo Stopping postfix; /usr/sbin/postfix stop; exit 0; }" EXIT
 
 if [[ ! -z "${MAILINGLIST}" ]]
 then
-    supervisorctl start sympa
+    supervisorctl start mailman
 fi
 
 sleep infinity   

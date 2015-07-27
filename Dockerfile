@@ -32,8 +32,8 @@ RUN groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail && \
     libauthcas-perl libcrypt-ciphersaber-perl libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl libspf2-dev \
     libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl libmail-spf-perl libpthread-stubs0-dev \
     libmail-spf-xs-perl libmilter-dev libpcre3-dev libssl-dev libbsd-dev ssl-cert python3 python3-setuptools \
-    libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc libicu-dev vim nano less && \
-    easy_install3 pip python-virtualenv
+    libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc libicu-dev vim nano less python-virtualenv && \
+    easy_install3 pip
 
 # ClamAV
 ADD resources/cron.d /etc/cron.d

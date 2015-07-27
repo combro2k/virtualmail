@@ -179,7 +179,7 @@ RUN tar czvf /root/build.tgz /usr/src/build --remove-files && \
     rm -fr /var/lib/apt
 
 EXPOSE 587 25 465 4190 995 993 110 143
-VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/opendmarc"]
+VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/opendmarc", "/var/mailman"]
 
 WORKDIR /
 

@@ -156,7 +156,7 @@ ADD resources/opendmarc /etc/opendmarc
 
 # Mailman
 RUN virtualenv -p python3.4 /opt/mailman && \
-    /opt/mailman/bin/pip3.4 install mailman mailman-bundler && \
+    /opt/mailman/bin/pip3.4 install mailman mailman-bundler postorius && \
     mkdir -p /etc/mailman.d
 
 ADD resources/mailman3/mailman.cfg /etc/mailman.cfg

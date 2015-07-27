@@ -1,0 +1,1 @@
+0 4 * * * /usr/bin/freshclam --quiet --config-file=/etc/clamav/freshclam.conf

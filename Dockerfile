@@ -4,16 +4,16 @@ MAINTAINER Martijn van Maurik <docker@vmaurik.nl>
 ENV DEBIAN_FRONTEND noninteractive
 
 # Software versions
-ENV POSTFIX_VERSION 3.0.1
+ENV POSTFIX_VERSION 3.0.2
 ENV DOVECOT_MAIN 2.2
 ENV DOVECOT_VERSION 2.2.18
-ENV DOVECOT_PIGEONHOLE 0.4.6
+ENV DOVECOT_PIGEONHOLE 0.4.8
 ENV OPENDKIM_VERSION 2.10.3
 ENV PYPOLICYD_SPF_MAIN 1.3
 ENV PYPOLICYD_SPF_VERSION 1.3.1
 ENV CLAMAV_VERSION 0.98.7
 ENV AMAVISD_NEW_VERSION 2.10.1
-ENV GREYLIST_VERSION 4.4.3
+ENV GREYLIST_VERSION 4.5.14
 
 ENV AMAVISD_DB_HOME /var/lib/amavis/db
 
@@ -36,6 +36,7 @@ RUN groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail && \
     easy_install3 pip
 
 # ClamAV
+ADD resources/cron.d /etc/cron.d
 RUN addgroup clamav && addgroup amavis && \
     adduser --system --ingroup clamav --home /var/lib/clamav --quiet --shell /bin/sh --disabled-password clamav && \
     adduser --system --ingroup amavis --home /var/lib/amavis --quiet --shell /bin/sh --disabled-password amavis && \
@@ -173,12 +174,12 @@ ADD bin/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*
 
 # Cleanup build env
-RUN tar czvf build.tgz /usr/src/build --remove-files && \
+RUN tar czvf /root/build.tgz /usr/src/build --remove-files && \
     apt-get clean && \
     rm -fr /var/lib/apt
 
 EXPOSE 587 25 465 4190 995 993 110 143
-VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/opendmarc", "/home/sympa/list_data", "/home/sympa/arc"]
+VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/opendmarc"]
 
 WORKDIR /
 

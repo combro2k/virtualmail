@@ -1,9 +1,9 @@
 #!/bin/bash
 # call "mailman stop" when exiting
-trap "{ echo Stopping Mailman; /usr/local/bin/mailman stop; exit 0; }" EXIT
+trap "{ echo Stopping Mailman; /opt/mailman/bin/mailman stop; exit 0; }" EXIT
 
 # start postfix
-/usr/local/bin/mailman start
+/opt/mailman/bin/mailman start
 # avoid exiting
 
 sleep infinity

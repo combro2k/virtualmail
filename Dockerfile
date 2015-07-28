@@ -31,7 +31,7 @@ RUN groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail && \
     libmime-types-perl libnet-netmask-perl libtemplate-perl flex libbind-dev libgeoip-dev libterm-progressbar-perl libintl-perl \
     libauthcas-perl libcrypt-ciphersaber-perl libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl libspf2-dev \
     libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl libmail-spf-perl libpthread-stubs0-dev \
-    libmail-spf-xs-perl libmilter-dev libpcre3-dev libssl-dev libbsd-dev ssl-cert python3 python3-setuptools \
+    libmail-spf-xs-perl libmilter-dev libpcre3-dev libssl-dev libbsd-dev ssl-cert python3 python3-setuptools python2.7-dev \
     libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc libicu-dev vim nano less python-virtualenv bzr && \
     easy_install3 pip
 
@@ -155,11 +155,16 @@ RUN mkdir -p /usr/src/build/opendmarc && cd /usr/src/build/opendmarc && \
 ADD resources/opendmarc /etc/opendmarc
 
 # Mailman
-RUN virtualenv --system-site-packages -p python3.4 /opt/mailman && \
-    /opt/mailman/bin/pip3.4 install -U mailman mailman-bundler postorius mailmanclient python-social-auth && \
-    python -c 'import pip, subprocess; [subprocess.call("pip install -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]' && \
-    mkdir -p /etc/mailman.d
+RUN mkdir -p /etc/mailman.d /opt/mailman_web && \
+    virtualenv --system-site-packages -p python3.4 /opt/mailman && \
+    /opt/mailman/bin/pip install --pre -U mailman mailman-hyperkitty && \
+    /opt/mailman/bin/python -c 'import pip, subprocess; [subprocess.call("/opt/mailman/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]' && \
+    virtualenv --system-site-packages -p python2.7 /opt/postorius && \
+    /opt/postorius/bin/pip install -U --pre flup postorius Whoosh mock beautifulsoup4 hyperkitty python-openid python-social-auth && \
+    bzr branch lp:~mailman-coders/postorius/postorius_standalone /opt/postorius_standalone && \
+    /opt/postorius/bin/python /opt/postorius_standalone/manage.py syncdb --noinput
 
+ADD resources/nginx/postorius-nginx.conf /etc/nginx/conf.d/default.conf
 ADD resources/mailman3/mailman.cfg /etc/mailman.cfg
 ADD resources/mailman3/mailman.d/* /etc/mailman.d/
 

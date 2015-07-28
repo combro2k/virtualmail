@@ -32,7 +32,7 @@ RUN groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail && \
     libauthcas-perl libcrypt-ciphersaber-perl libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl libspf2-dev \
     libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl libmail-spf-perl libpthread-stubs0-dev \
     libmail-spf-xs-perl libmilter-dev libpcre3-dev libssl-dev libbsd-dev ssl-cert python3 python3-setuptools \
-    libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc libicu-dev vim nano less python-virtualenv && \
+    libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc libicu-dev vim nano less python-virtualenv bzr && \
     easy_install3 pip
 
 # ClamAV
@@ -156,7 +156,8 @@ ADD resources/opendmarc /etc/opendmarc
 
 # Mailman
 RUN virtualenv --system-site-packages -p python3.4 /opt/mailman && \
-    /opt/mailman/bin/pip3.4 install -U  mailman mailman-bundler postorius mailmanclient && \
+    /opt/mailman/bin/pip3.4 install -U mailman mailman-bundler postorius mailmanclient python-social-auth && \
+    python -c 'import pip, subprocess; [subprocess.call("pip install -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]' && \
     mkdir -p /etc/mailman.d
 
 ADD resources/mailman3/mailman.cfg /etc/mailman.cfg

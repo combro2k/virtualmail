@@ -1,19 +1,66 @@
 #!/bin/bash
-# call "mailman stop" when exiting
-trap "{ echo Stopping Mailman; /opt/mailman/bin/mailman stop; kill `cat /var/mailman/mailman3.pid`; rm /var/mailman/mailman3.pid; nginx -s stop; exit 0; }" EXIT
 
-sed -i "s/mail.example.org/${HOSTNAME}/g" /etc/nginx/conf.d/postorius-nginx.conf
+function stop {
+    echo Stopping mailman...
+    start-stop-daemon --stop --oknodo --pidfile /var/run/mailman/master.pid
+    rm /var/run/mailman/master.pid
 
-if [[ -f "/opt/postorius_standalone/postorius.db" ]]
+    echo Stopping postorius...
+    start-stop-daemon --stop --oknodo --pidfile /var/run/mailman/postorius.pid
+    rm /var/run/mailman/postorius.pid
+
+    echo Stopping nginx...
+    nginx -s stop
+    exit 0
+}
+
+trap stop EXIT
+
+sed -i "s/mail.example.org/${HOSTNAME}/g" /etc/nginx/conf.d/default.conf
+
+if [[ ! -d "/var/run/mailman" ]]
 then
-    /opt/postorius/bin/python /opt/postorius_standalone/manage.py syncdb --noinput
+    mkdir -p /var/run/mailman
 fi
 
-/opt/postorius/bin/python /opt/postorius_standalone/manage.py runfcgi socket=/var/mailman/mailman3.sock method=prefork pidfile=/var/mailman/mailman3.pid umask=000
+if [[ ! -f "/var/mailman/postorius.db" ]]
+then
+    if [[ -z "${MAILMAN_PASSWORD}" ]]
+    then
+        MAILMAN_PASSWORD=$(pwgen -1 12)
+    fi
+
+    echo ${MAILMAN_PASSWORD} > /var/mailman/.postorius_password
+
+    if [[ -z "${MAILMAN_EMAIL}" ]]
+    then
+        MAILMAN_EMAIL=admin@${MAILINGLIST}
+    fi
+
+    if [[ -z "${MAILMAN_USERNAME}" ]]
+    then
+        MAILMAN_USERNAME=admin
+    fi
+
+    /opt/postorius/bin/python /opt/postorius_standalone/manage.py syncdb --noinput
+    /opt/postorius/bin/python /opt/postorius_standalone/manage.py collectstatic --noinput
+    echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', '${MAILMAN_EMAIL}', '${MAILMAN_PASSWORD}')" \
+        | /opt/postorius/bin/python /opt/postorius_standalone/manage.py shell
+fi
+
+echo Starting postorius...
+start-stop-daemon --start --pidfile=/var/run/mailman/postorius.pid --exec \
+    "/opt/postorius/bin/python" -- \
+    /opt/postorius_standalone/manage.py runfcgi \
+        pidfile=/var/run/mailman/postorius.pid \
+        socket=/var/run/postorius.sock \
+        method=prefork \
+        umask=000
+
+echo Starting nginx...
 nginx
 
-# start postfix
-/opt/mailman/bin/mailman -C /etc/mailman.cfg start --force
-# avoid exiting
+echo Starting mailman...
+start-stop-daemon --start --pidfile=/var/run/mailman/master.pid --exec "/opt/mailman/bin/python" -- /opt/mailman/bin/mailman -C /etc/mailman.cfg start
 
 sleep infinity

@@ -159,7 +159,7 @@ RUN ln -s /usr/bin/nodejs /usr/bin/node && \
     npm install -g less && \
     mkdir -p /etc/mailman.d /var/log/mailman && \
     virtualenv --system-site-packages -p python3.4 /opt/mailman && \
-    /opt/mailman/bin/pip install --pre -U mailman mailman-hyperkitty django flipflop && \
+    /opt/mailman/bin/pip install --pre -U mailman mailman-hyperkitty && \
     /opt/mailman/bin/python -c 'import pip, subprocess; [subprocess.call("/opt/mailman/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]' && \
     virtualenv --system-site-packages -p python2.7 /opt/postorius && \
     /opt/postorius/bin/pip install -U --pre django-gravatar flup postorius Whoosh mock beautifulsoup4 hyperkitty python-openid python-social-auth django-browserid && \

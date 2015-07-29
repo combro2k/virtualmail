@@ -16,7 +16,25 @@ function stop {
 
 trap stop EXIT
 
-sed -i "s/mail.example.org/${HOSTNAME}/g" /etc/nginx/conf.d/default.conf
+if [[ -z "${MAILMAN_PASSWORD}" ]]
+then
+    export MAILMAN_PASSWORD=$(pwgen -1 12)
+fi
+
+echo ${MAILMAN_PASSWORD} > /var/mailman/.postorius_password
+
+if [[ -z "${MAILMAN_EMAIL}" ]]
+then
+    export MAILMAN_EMAIL=admin@${MAILINGLIST}
+fi
+
+if [[ -z "${MAILMAN_USERNAME}" ]]
+then
+    MAILMAN_USERNAME=admin
+fi
+
+sed -i "s/mail.example.org/${MAILINGLIST}/g" /etc/nginx/conf.d/nginx-postorius.conf
+sed -i "s/__MAILMAN_EMAIL__/${MAILMAN_EMAIL}/g" /etc/nginx/conf.d/nginx-postorius.conf
 
 if [[ ! -d "/var/run/mailman" ]]
 then
@@ -25,30 +43,14 @@ fi
 
 if [[ ! -f "/var/mailman/postorius.db" ]]
 then
-    if [[ -z "${MAILMAN_PASSWORD}" ]]
-    then
-        MAILMAN_PASSWORD=$(pwgen -1 12)
-    fi
-
-    echo ${MAILMAN_PASSWORD} > /var/mailman/.postorius_password
-
-    if [[ -z "${MAILMAN_EMAIL}" ]]
-    then
-        MAILMAN_EMAIL=admin@${MAILINGLIST}
-    fi
-
-    if [[ -z "${MAILMAN_USERNAME}" ]]
-    then
-        MAILMAN_USERNAME=admin
-    fi
-
     /opt/postorius/bin/python /opt/postorius_standalone/manage.py syncdb --noinput
     /opt/postorius/bin/python /opt/postorius_standalone/manage.py collectstatic --noinput
+    /opt/postorius/bin/python /opt/postorius_standalone/manage.py compress
     echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', '${MAILMAN_EMAIL}', '${MAILMAN_PASSWORD}')" \
         | /opt/postorius/bin/python /opt/postorius_standalone/manage.py shell
 fi
 
-echo Starting postorius...
+echo Starting postorius
 start-stop-daemon --start --pidfile=/var/run/mailman/postorius.pid --exec \
     "/opt/postorius/bin/python" -- \
     /opt/postorius_standalone/manage.py runfcgi \

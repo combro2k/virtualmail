@@ -166,6 +166,7 @@ RUN ln -s /usr/bin/nodejs /usr/bin/node && \
     rm /etc/nginx/conf.d/default.conf
 
 ADD resources/postorius_standalone /opt/postorius_standalone
+ADD resources/nginx/nginx.conf /etc/nginx/nginx.conf
 ADD resources/nginx/nginx-postorius.conf /etc/nginx/conf.d/nginx-postorius.conf
 ADD resources/mailman3/mailman.cfg /etc/mailman.cfg
 ADD resources/mailman3/mailman.d/* /etc/mailman.d/

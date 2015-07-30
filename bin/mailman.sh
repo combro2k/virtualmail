@@ -1,5 +1,12 @@
 #!/bin/bash
 
+if [[ -f "/var/run/mailman/master.pid" ]]
+then
+    echo Mailman already running...
+
+    exit 1
+fi
+
 function stop {
     echo Stopping mailman...
     start-stop-daemon --stop --oknodo --pidfile /var/run/mailman/master.pid
@@ -11,6 +18,7 @@ function stop {
 
     echo Stopping nginx...
     nginx -s stop
+
     exit 0
 }
 
@@ -41,13 +49,17 @@ then
     mkdir -p /var/run/mailman
 fi
 
-if [[ ! -f "/var/mailman/postorius.db" ]]
+if [[ ! -f "/var/mailman/data/postorius.db" ]]
 then
     /opt/postorius/bin/python /opt/postorius_standalone/manage.py syncdb --noinput
-    /opt/postorius/bin/python /opt/postorius_standalone/manage.py collectstatic --noinput
-    /opt/postorius/bin/python /opt/postorius_standalone/manage.py compress
     echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', '${MAILMAN_EMAIL}', '${MAILMAN_PASSWORD}')" \
         | /opt/postorius/bin/python /opt/postorius_standalone/manage.py shell
+fi
+
+if [[ ! -d "/opt/postorius_standalone/static/admin" ]]
+then
+    /opt/postorius/bin/python /opt/postorius_standalone/manage.py collectstatic --noinput
+    /opt/postorius/bin/python /opt/postorius_standalone/manage.py compress
 fi
 
 echo Starting postorius
@@ -63,6 +75,6 @@ echo Starting nginx...
 nginx
 
 echo Starting mailman...
-start-stop-daemon --start --pidfile=/var/run/mailman/master.pid --exec "/opt/mailman/bin/python" -- /opt/mailman/bin/mailman -C /etc/mailman.cfg start
+start-stop-daemon --start --pidfile=/var/run/mailman/master.pid --exec "/opt/mailman/bin/python" -- /opt/mailman/bin/mailman -C /etc/mailman.cfg start --force
 
 sleep infinity

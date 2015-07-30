@@ -84,7 +84,7 @@ MAILMAN_THEME = "default"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/var/mailman/postorius.db'
+        'NAME': '/var/mailman/data/postorius.db'
     }
 }
 
@@ -193,7 +193,7 @@ COMPRESS_PRECOMPILERS = (
    ('text/less', 'lessc {infile} {outfile}'),
 )
 
-COMPRESS_OFFLINE = False
+COMPRESS_OFFLINE = True
 # needed for debug mode
 #INTERNAL_IPS = ('127.0.0.1',)
 

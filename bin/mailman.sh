@@ -24,6 +24,8 @@ function stop {
 
 trap stop EXIT
 
+test ! -d "/var/mailman/data" && /opt/mailman/bin/mailman help > /dev/null 2>&1
+
 if [[ ! -f "/var/mailman/data/postorius_password" ]]
 then
     test -z "${MAILMAN_PASSWORD}" && export MAILMAN_PASSWORD=$(pwgen -1 12)
@@ -32,9 +34,12 @@ else
     export MAILMAN_PASSWORD=$(cat /var/mailman/data/postorius_password)
 fi
 
-if [[ ! -f "/var/mailman/data/postorius_password" ]]
+if [[ ! -f "/var/mailman/data/postorius_secretkey" ]]
 then
-    test -z "${POSTORIUS_SECRET_KEY}" && POSTORIUS_SECRET_KEY=$(pwgen -1 24)
+    test -z "${POSTORIUS_SECRET_KEY}" && export POSTORIUS_SECRET_KEY=$(pwgen -1 24)
+    echo ${POSTORIUS_SECRET_KEY} | tee /var/mailman/data/postorius_secretkey
+else
+    export POSTORIUS_SECRET_KEY=$(cat /var/mailman/data/postorius_secretkey)
 fi
 
 test -z "${MAILMAN_EMAIL}" && export MAILMAN_EMAIL=admin@${MAILINGLIST}
@@ -46,8 +51,8 @@ sed -i "s/SecretArchiverAPIKey/${MAILMAN_PASSWORD}/g" /opt/postorius_standalone/
 
 if [[ ! -f "/var/mailman/data/postorius_settings.py" ]]
 then
-    touch /var/mailman/postorius_settings.py
-    echo "SECRET_KEY = '" | tee -a /var/mailman/data/postorius_settings.py > /dev/null
+    touch /var/mailman/data/postorius_settings.py
+    echo "SECRET_KEY = '${POSTORIUS_SECRET_KEY}'" | tee -a /var/mailman/data/postorius_settings.py > /dev/null
     echo "MAILMAN_ARCHIVER_KEY = '${MAILMAN_PASSWORD}'" | tee -a /var/mailman/data/postorius_settings.py > /dev/null
 fi
 

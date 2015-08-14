@@ -78,7 +78,7 @@ RUN mkdir -p /usr/src/build/amavisd-milter && cd /usr/src/build/amavisd-milter &
     curl -L http://sourceforge.net/projects/amavisd-milter/files/latest/download | tar zxv --strip-components=1 && \
     ./configure --with-working-dir=/var/lib/amavis/tmp --prefix=/usr && make && make install
 
-# Postfix 3.0.0
+# Postfix 3.0.2
 RUN mkdir -p /usr/src/build/postfix && cd /usr/src/build/postfix && \
     useradd postfix && useradd postdrop && \
     curl -L http://mirror.lhsolutions.nl/postfix-release/official/postfix-${POSTFIX_VERSION}.tar.gz | tar zxv --strip-components=1 && \

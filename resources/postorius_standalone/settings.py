@@ -6,7 +6,7 @@ Django settings for HyperKitty + Postorius
 import os
 
 # Use SSL when logged in
-USE_SSL = True
+USE_SSL = False
 
 APPEND_SLASH = True
 
@@ -21,7 +21,7 @@ DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('admin', os.environ.get('MAILMAN_EMAIL')),
+    ('admin', 'admin@mail.example.org'),
 )
 
 MANAGERS = ADMINS
@@ -35,10 +35,12 @@ BROWSERID_AUDIENCES = [ "http://localhost", "http://localhost:8000" ]
 
 # Mailman API credentials
 MAILMAN_REST_SERVER = MAILMAN_API_URL = 'http://localhost:8001'
-MAILMAN_API_USER = MAILMAN_USER = 'restadmin'
-MAILMAN_API_PASS = MAILMAN_PASS = 'restpass'
+MAILMAN_USER = 'restadmin'
+MAILMAN_PASS = 'restpass'
+MAILMAN_API_USER = MAILMAN_USER
+MAILMAN_API_PASS = MAILMAN_PASS
 MAILMAN_ARCHIVER_KEY = 'SecretArchiverAPIKey'
-MAILMAN_ARCHIVER_FROM = ('127.0.0.1', '::1', '::ffff:127.0.0.1')
+MAILMAN_ARCHIVER_FROM = ('127.0.0.1')
 
 # Application definition
 INSTALLED_APPS = (
@@ -89,14 +91,13 @@ DATABASES = {
 }
 
 EMAIL_HOST = '127.0.0.1'
-
-DEFAULT_FROM_EMAIL = os.environ.get('MAILMAN_EMAIL')
+DEFAULT_FROM_EMAIL = 'admin@mail.example.org'
 
 #USE_X_FORWARDED_HOST = False
 #SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+#SESSION_COOKIE_SECURE = False
+#CSRF_COOKIE_SECURE = True
 
 LANGUAGE_CODE = 'en-us'
 
@@ -159,22 +160,33 @@ BROWSERID_USERNAME_ALGO = lambda email: email # Use the email as identifier
 BROWSERID_VERIFY_CLASS = "django_browserid.views.Verify"
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
+        #'social.backends.open_id.OpenIdAuth',
+        # http://python-social-auth.readthedocs.org/en/latest/backends/google.html
+        'social.backends.google.GoogleOpenId',
+        #'social.backends.google.GoogleOAuth2',
+        #'social.backends.twitter.TwitterOAuth',
+        'social.backends.yahoo.YahooOpenId',
+        'django_browserid.auth.BrowserIDBackend',
+        'django.contrib.auth.backends.ModelBackend',
 )
 
 SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True
 
 # http://python-social-auth.readthedocs.org/en/latest/pipeline.html#authentication-pipeline
 SOCIAL_AUTH_PIPELINE = (
-    #'social.pipeline.social_auth.social_details',
-    #'social.pipeline.social_auth.social_uid',
-    #'social.pipeline.social_auth.auth_allowed',
-    #'social.pipeline.social_auth.social_user',
-    #'social.pipeline.user.get_username',
-    #'social.pipeline.user.create_user',
-    #'social.pipeline.social_auth.associate_user',
-    #'social.pipeline.social_auth.load_extra_data',
-    #'social.pipeline.user.user_details',
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'social.pipeline.social_auth.social_user',
+    'social.pipeline.user.get_username',
+    # Associates the current social details with another user account with
+    # a similar email address. Disabled by default, enable with care:
+    # http://python-social-auth.readthedocs.org/en/latest/use_cases.html#associate-users-by-email
+    #'social.pipeline.social_auth.associate_by_email',
+    'social.pipeline.user.create_user',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details',
 )
 
 # Gravatar base url.
@@ -214,18 +226,55 @@ HAYSTACK_CONNECTIONS = {
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
     'handlers': {
-        'file': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'security':{
+            'level': 'INFO',
+            'class': 'logging.handlers.WatchedFileHandler',
+            'filename': '/var/log/mailman/postorius.security.log',
+            'formatter': 'verbose',
+        },
+        'console':{
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': '/var/log/mailman/postorius.log',
+            'class': 'logging.StreamHandler',
+            'filters': ['require_debug_false'],
+            'formatter': 'simple'
         },
     },
     'loggers': {
+        'django.security.DisallowedHost': {
+            'handlers': ['security'],
+            'propagate': False,
+        },
         'django.request': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'hyperkitty': {
+            'handlers': ['console', 'mail_admins'],
+            'level': 'INFO',
+        },
+        'postorius': {
+            'handlers': ['console', 'mail_admins'],
+            'level': 'INFO',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
         },
     },
 }
@@ -248,7 +297,6 @@ APP_NAME = 'Mailing-list archives'
 # By default, only a login through Persona or your email provider is allowed.
 USE_INTERNAL_AUTH = False
 
-
 # Only display mailing-lists from the same virtual host as the webserver
 FILTER_VHOST = False
 
@@ -256,6 +304,6 @@ FILTER_VHOST = False
 USE_MOCKUPS = False
 
 try:
-    from settings_local import *
+    from postorius_settings import *
 except ImportError:
     pass

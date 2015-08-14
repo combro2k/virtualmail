@@ -24,36 +24,43 @@ function stop {
 
 trap stop EXIT
 
-if [[ -z "${MAILMAN_PASSWORD}" ]]
+if [[ ! -f "/var/mailman/data/postorius_password" ]]
 then
-    export MAILMAN_PASSWORD=$(pwgen -1 12)
+    test -z "${MAILMAN_PASSWORD}" && export MAILMAN_PASSWORD=$(pwgen -1 12)
+    echo ${MAILMAN_PASSWORD} | tee /var/mailman/data/postorius_password > /dev/null
+else
+    export MAILMAN_PASSWORD=$(cat /var/mailman/data/postorius_password)
 fi
 
-echo ${MAILMAN_PASSWORD} > /var/mailman/.postorius_password
-
-if [[ -z "${MAILMAN_EMAIL}" ]]
+if [[ ! -f "/var/mailman/data/postorius_password" ]]
 then
-    export MAILMAN_EMAIL=admin@${MAILINGLIST}
+    test -z "${POSTORIUS_SECRET_KEY}" && POSTORIUS_SECRET_KEY=$(pwgen -1 24)
 fi
 
-if [[ -z "${MAILMAN_USERNAME}" ]]
-then
-    MAILMAN_USERNAME=admin
-fi
+test -z "${MAILMAN_EMAIL}" && export MAILMAN_EMAIL=admin@${MAILINGLIST}
+test -z "${MAILMAN_USERNAME}" && MAILMAN_USERNAME=admin
 
 sed -i "s/mail.example.org/${MAILINGLIST}/g" /etc/nginx/conf.d/nginx-postorius.conf
-sed -i "s/__MAILMAN_EMAIL__/${MAILMAN_EMAIL}/g" /etc/nginx/conf.d/nginx-postorius.conf
+sed -i "s/mail.example.org/${MAILINGLIST}/g" /opt/postorius_standalone/hyperkitty.cfg
+sed -i "s/SecretArchiverAPIKey/${MAILMAN_PASSWORD}/g" /opt/postorius_standalone/hyperkitty.cfg
 
-if [[ ! -d "/var/run/mailman" ]]
+if [[ ! -f "/var/mailman/data/postorius_settings.py" ]]
 then
-    mkdir -p /var/run/mailman
+    touch /var/mailman/postorius_settings.py
+    echo "SECRET_KEY = '" | tee -a /var/mailman/data/postorius_settings.py > /dev/null
+    echo "MAILMAN_ARCHIVER_KEY = '${MAILMAN_PASSWORD}'" | tee -a /var/mailman/data/postorius_settings.py > /dev/null
 fi
+
+test ! -L "/opt/postorius_standalone/postorius_settings.py" -o ! -f /opt/postorius_standalone/postorius_settings.py && \
+    ln -vfs /var/mailman/data/postorius_settings.py /opt/postorius_standalone/postorius_settings.py
+
+test ! -d "/var/run/mailman" && mkdir -p /var/run/mailman
 
 if [[ ! -f "/var/mailman/data/postorius.db" ]]
 then
     /opt/postorius/bin/python /opt/postorius_standalone/manage.py syncdb --noinput
-    echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', '${MAILMAN_EMAIL}', '${MAILMAN_PASSWORD}')" \
-        | /opt/postorius/bin/python /opt/postorius_standalone/manage.py shell
+    echo "from django.contrib.auth.models import User; User.objects.create_superuser('${MAILMAN_USERNAME}', '${MAILMAN_EMAIL}', '${MAILMAN_PASSWORD}')" | /opt/postorius/bin/python /opt/postorius_standalone/manage.py shell
+    echo "Created an postorius user ${MAILMAN_USERNAME} with password ${MAILMAN_PASSWORD}"
 fi
 
 if [[ ! -d "/opt/postorius_standalone/static/admin" ]]
@@ -63,13 +70,7 @@ then
 fi
 
 echo Starting postorius
-start-stop-daemon --start --pidfile=/var/run/mailman/postorius.pid --exec \
-    "/opt/postorius/bin/python" -- \
-    /opt/postorius_standalone/manage.py runfcgi \
-        pidfile=/var/run/mailman/postorius.pid \
-        socket=/var/run/postorius.sock \
-        method=prefork \
-        umask=000
+start-stop-daemon --start --pidfile=/var/run/mailman/postorius.pid --exec "/opt/postorius/bin/python" -- /opt/postorius_standalone/manage.py runfcgi pidfile=/var/run/mailman/postorius.pid socket=/var/run/postorius.sock method=prefork umask=000
 
 echo Starting nginx...
 nginx

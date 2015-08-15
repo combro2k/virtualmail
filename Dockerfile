@@ -4,17 +4,16 @@ MAINTAINER Martijn van Maurik <docker@vmaurik.nl>
 ENV DEBIAN_FRONTEND noninteractive
 
 # Software versions
-ENV POSTFIX_VERSION 3.0.1
+ENV POSTFIX_VERSION 3.0.2
 ENV DOVECOT_MAIN 2.2
 ENV DOVECOT_VERSION 2.2.18
-ENV DOVECOT_PIGEONHOLE 0.4.6
-ENV SYMPA_VERSION 6.2
+ENV DOVECOT_PIGEONHOLE 0.4.8
 ENV OPENDKIM_VERSION 2.10.3
 ENV PYPOLICYD_SPF_MAIN 1.3
 ENV PYPOLICYD_SPF_VERSION 1.3.1
 ENV CLAMAV_VERSION 0.98.7
 ENV AMAVISD_NEW_VERSION 2.10.1
-ENV GREYLIST_VERSION 4.4.3
+ENV GREYLIST_VERSION 4.5.14
 
 ENV AMAVISD_DB_HOME /var/lib/amavis/db
 
@@ -24,22 +23,20 @@ RUN groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A373FB480EC4FE05 && \
     echo deb http://nginx.org/packages/mainline/ubuntu trusty nginx > /etc/apt/sources.list.d/nginx-stable-trusty.list && \
-    apt-get update && apt-get dist-upgrade -yq && apt-get install -yq \
-    libberkeleydb-perl libnet-dns-perl libnet-server-perl libnet-rblclient-perl \
-    rsyslog libdb-dev libmysqlclient-dev libmysqlclient18 cron xz-utils \
-    pyzor razor libencode-detect-perl libdbi-perl libdbd-mysql-perl \
-    arj cabextract cpio nomarch pax unzip zip supervisor curl \
-    libxml-libxml-perl libhtml-stripscripts-parser-perl bitdefender-scanner\
-    libfile-copy-recursive-perl libdist-zilla-localetextdomain-perl \
+    apt-get update && apt-get dist-upgrade -yq && apt-get install -yq libberkeleydb-perl libnet-dns-perl libnet-server-perl \
+    libnet-rblclient-perl rsyslog libdb-dev libmysqlclient-dev libmysqlclient18 cron xz-utils build-essential \
+    pyzor razor libencode-detect-perl libdbi-perl libdbd-mysql-perl arj cabextract cpio nomarch pax unzip zip supervisor curl \
+    libxml-libxml-perl libhtml-stripscripts-parser-perl bitdefender-scanner libfile-copy-recursive-perl libdist-zilla-localetextdomain-perl \
     libmime-charset-perl libmime-encwords-perl libmime-lite-html-perl libcurl4-openssl-dev libcurlpp-dev \
-    libmime-types-perl libnet-netmask-perl libtemplate-perl flex libbind-dev libgeoip-dev \
-    libterm-progressbar-perl libintl-perl libauthcas-perl libcrypt-ciphersaber-perl \
-    libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl libspf2-dev \
-    libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl libmail-spf-perl libpthread-stubs0-dev \
-    libmail-spf-xs-perl libmilter-dev libpcre3-dev libssl-dev libbsd-dev ssl-cert python3-pip \
-    libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc libicu-dev
+    libmime-types-perl libnet-netmask-perl libtemplate-perl flex libbind-dev libgeoip-dev libterm-progressbar-perl libintl-perl \
+    libauthcas-perl libcrypt-ciphersaber-perl libcrypt-openssl-x509-perl libfcgi-perl libsoap-lite-perl libdata-password-perl libspf2-dev \
+    libfile-nfslock-perl fcgiwrap nginx libcgi-fast-perl libmail-spf-perl libpthread-stubs0-dev nodejs npm \
+    libmail-spf-xs-perl libmilter-dev libpcre3-dev libssl-dev libbsd-dev ssl-cert python3 python3-setuptools python2.7-dev \
+    libnet-libidn-perl libunix-syslog-perl libarchive-zip-perl libglib2.0-dev intltool ruby-dev byacc libicu-dev vim nano less python-virtualenv pwgen && \
+    easy_install3 pip
 
 # ClamAV
+ADD resources/cron.d /etc/cron.d
 RUN addgroup clamav && addgroup amavis && \
     adduser --system --ingroup clamav --home /var/lib/clamav --quiet --shell /bin/sh --disabled-password clamav && \
     adduser --system --ingroup amavis --home /var/lib/amavis --quiet --shell /bin/sh --disabled-password amavis && \
@@ -81,7 +78,7 @@ RUN mkdir -p /usr/src/build/amavisd-milter && cd /usr/src/build/amavisd-milter &
     curl -L http://sourceforge.net/projects/amavisd-milter/files/latest/download | tar zxv --strip-components=1 && \
     ./configure --with-working-dir=/var/lib/amavis/tmp --prefix=/usr && make && make install
 
-# Postfix 3.0.0
+# Postfix 3.0.2
 RUN mkdir -p /usr/src/build/postfix && cd /usr/src/build/postfix && \
     useradd postfix && useradd postdrop && \
     curl -L http://mirror.lhsolutions.nl/postfix-release/official/postfix-${POSTFIX_VERSION}.tar.gz | tar zxv --strip-components=1 && \
@@ -141,8 +138,8 @@ ADD resources/opendkim /etc/opendkim
 
 # SPF Policyd
 RUN mkdir -p /etc/postfix-policyd-spf-python && \
-    pip3 install authres pyspf https://ipaddr-py.googlecode.com/files/ipaddr-2.1.5-py3k.tar.gz py3dns --pre && \
-    pip3 install https://launchpad.net/pypolicyd-spf/${PYPOLICYD_SPF_MAIN}/${PYPOLICYD_SPF_VERSION}/+download/pypolicyd-spf-${PYPOLICYD_SPF_VERSION}.tar.gz && \
+    pip install authres pyspf https://ipaddr-py.googlecode.com/files/ipaddr-2.1.5-py3k.tar.gz py3dns --pre && \
+    pip install https://launchpad.net/pypolicyd-spf/${PYPOLICYD_SPF_MAIN}/${PYPOLICYD_SPF_VERSION}/+download/pypolicyd-spf-${PYPOLICYD_SPF_VERSION}.tar.gz && \
     mv /usr/local/bin/policyd-spf /usr/bin/policyd-spf
 
 ADD resources/policy-spf/policyd-spf.conf /etc/postfix-policyd-spf-python/policyd-spf.conf
@@ -157,19 +154,22 @@ RUN mkdir -p /usr/src/build/opendmarc && cd /usr/src/build/opendmarc && \
 
 ADD resources/opendmarc /etc/opendmarc
 
-# Sympa
-RUN mkdir -p /usr/src/build/sympa && cd /usr/src/build/sympa && \
-    curl http://www.sympa.org/distribution/sympa-${SYMPA_VERSION}.tar.gz | tar zxv --strip-components=1 && \
-    ./configure && make && make install && \
-    cpan -f install MHonArc::UTF8 Template::Stash::XS Text::LineFold && \
-    useradd sympa && chown -R sympa:sympa /home/sympa && \
-    locale-gen en_US en_US.UTF-8 nl_NL nl_NL.UTF-8 && \
-    sed -i 's#www-data#sympa#g' /etc/init.d/fcgiwrap && \
-    sed -i 's#user  nginx;#user  sympa;#g' /etc/nginx/nginx.conf && \
-    rm /etc/nginx/conf.d/*.conf
+# Mailman
+RUN ln -s /usr/bin/nodejs /usr/bin/node && \
+    npm install -g less && \
+    mkdir -p /etc/mailman.d /var/log/mailman && \
+    virtualenv --system-site-packages -p python3.4 /opt/mailman && \
+    /opt/mailman/bin/pip install --pre -U mailman mailman-hyperkitty && \
+    /opt/mailman/bin/python -c 'import pip, subprocess; [subprocess.call("/opt/mailman/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]' && \
+    virtualenv --system-site-packages -p python2.7 /opt/postorius && \
+    /opt/postorius/bin/pip install -U --pre django-gravatar flup postorius Whoosh mock beautifulsoup4 hyperkitty python-openid python-social-auth django-browserid && \
+    rm /etc/nginx/conf.d/default.conf
 
-ADD resources/sympa/sympa-nginx.conf /etc/nginx/conf.d/sympa-nginx.conf
-ADD resources/sympa/sympa.conf /etc/sympa.conf
+ADD resources/postorius_standalone /opt/postorius_standalone
+ADD resources/nginx/nginx.conf /etc/nginx/nginx.conf
+ADD resources/nginx/nginx-postorius.conf /etc/nginx/conf.d/nginx-postorius.conf
+ADD resources/mailman3/mailman.cfg /etc/mailman.cfg
+ADD resources/mailman3/mailman.d/* /etc/mailman.d/
 
 # Milter Manager
 RUN mkdir -p /usr/src/build/milter-manager && cd /usr/src/build/milter-manager && \
@@ -184,12 +184,12 @@ ADD bin/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*
 
 # Cleanup build env
-RUN tar czvf build.tgz /usr/src/build --remove-files && \
+RUN tar czvf /root/build.tgz /usr/src/build --remove-files && \
     apt-get clean && \
     rm -fr /var/lib/apt
 
 EXPOSE 587 25 465 4190 995 993 110 143
-VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/opendmarc", "/home/sympa/list_data", "/home/sympa/arc"]
+VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/opendmarc", "/var/mailman"]
 
 WORKDIR /
 

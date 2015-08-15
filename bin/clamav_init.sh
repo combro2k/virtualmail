@@ -6,6 +6,5 @@ chown -R clamav:clamav /var/lib/clamav/
 
 /usr/bin/freshclam --quiet --config-file=/etc/clamav/freshclam.conf
 
-supervisorctl start freshclam
 supervisorctl start clamd
 sleep infinity

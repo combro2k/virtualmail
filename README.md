@@ -29,7 +29,7 @@ A summary of this container: “The virtualmail container deploys and configures
       -P \
       combro2k/virtualmail
 
-## Aditional Mailman Mailinglist
+## Aditional Mailman(3) Mailinglist
     docker run -d
           -e "MYSQL_PORT_3306_TCP_ADDR=172.0.0.24" \
           -e "MYSQL_PORT_3306_TCP_PORT=3306" \
@@ -37,6 +37,7 @@ A summary of this container: “The virtualmail container deploys and configures
           -e "MAILINGLIST=list.example.org" \
           -h 'mail.example.org' \
           -v /var/vmail:/var/vmail \
+          -v /var/mailman:/var/mailman \
           -P \
           combro2k/virtualmail
           
@@ -46,7 +47,8 @@ A summary of this container: “The virtualmail container deploys and configures
  - /etc/amavis # configuration for amavis
  - /etc/opendkim # configuration for opendkim
  - /etc/opendmarc # OpenDMARC configuration
+ - /var/mailman # mailman store
  
 ### Build env
 You can extract all used source by going to /usr/src/, and untarring the source file:
-- cd /usr/src && tar zxvf build.tgz
+- cd / && tar zxvf ~/root/build.tgz

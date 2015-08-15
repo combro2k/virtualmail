@@ -39,7 +39,7 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
 myhostname = mail.example.org
 mydestination = $myhostname
-relay_domains = $mydestination
+relay_domains = $mydestination, hash:/var/mailman/data/postfix_domains
 
 # mail delivery
 recipient_delimiter = + 
@@ -87,7 +87,8 @@ smtpd_sasl_path = private/auth
 # mappings
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
-transport_maps = regexp:/etc/postfix/transport_regexp
+transport_maps = hash:/var/mailman/data/postfix_lmtp
+local_recipient_maps = hash:/var/mailman/data/postfix_lmtp
 
 # virtual setup
 dovecot_destination_recipient_limit = 1

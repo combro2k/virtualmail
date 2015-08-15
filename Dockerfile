@@ -175,7 +175,7 @@ ADD resources/mailman3/mailman.d/* /etc/mailman.d/
 
 # Milter Manager
 RUN mkdir -p /usr/src/build/milter-manager && cd /usr/src/build/milter-manager && \
-    curl -L http://sourceforge.net/projects/milter-manager/files/milter%20manager/2.0.5/milter-manager-2.0.5.tar.gz/download | tar zv --strip-components=1 && \
+    curl -L http://sourceforge.net/projects/milter-manager/files/milter%20manager/2.0.5/milter-manager-2.0.5.tar.gz/download | tar zx --strip-components=1 && \
     ./configure --prefix=/usr --sysconfdir=/etc 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make install 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && \
     rm -fr /etc/milter-manager
 

@@ -29,12 +29,11 @@ A summary of this container: “The virtualmail container deploys and configures
       -P \
       combro2k/virtualmail
 
-## Aditional Sympa Mailinglist
+## Aditional Mailman Mailinglist
     docker run -d
           -e "MYSQL_PORT_3306_TCP_ADDR=172.0.0.24" \
           -e "MYSQL_PORT_3306_TCP_PORT=3306" \
           -e "POSTFIX_MYSQL_PASSWORD=postfixpassword" \
-          -e "SYMPA_MYSQL_PASSWORD=mysympapassword" \
           -e "MAILINGLIST=list.example.org" \
           -h 'mail.example.org' \
           -v /var/vmail:/var/vmail \
@@ -46,9 +45,6 @@ A summary of this container: “The virtualmail container deploys and configures
  - /etc/postfix # configuration for postfix
  - /etc/amavis # configuration for amavis
  - /etc/opendkim # configuration for opendkim
- - /home/sympa/list_data # data storage for sympa mailinglist
- - /home/sympa/arc # archives for sympa mailinglist
- - /etc/sympa.conf # configuration for sympa
  - /etc/opendmarc # OpenDMARC configuration
  
 ### Build env

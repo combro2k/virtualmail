@@ -2,21 +2,22 @@ FROM ubuntu-debootstrap:14.04
 MAINTAINER Martijn van Maurik <docker@vmaurik.nl>
 
 # Env variables
-ENV DEBIAN_FRONTEND noninteractive
-ENV INSTALL_LOG /var/log/build.log
-ENV AMAVISD_DB_HOME /var/lib/amavis/db
+ENV HOME=/root \
+    DEBIAN_FRONTEND=noninteractive \
+    INSTALL_LOG=/var/log/build.loge \
+    AMAVISD_DB_HOME=/var/lib/amavis/db
 
 # Software versions
-ENV POSTFIX_VERSION 3.0.2
-ENV DOVECOT_MAIN 2.2
-ENV DOVECOT_VERSION 2.2.18
-ENV DOVECOT_PIGEONHOLE 0.4.8
-ENV OPENDKIM_VERSION 2.10.3
-ENV PYPOLICYD_SPF_MAIN 1.3
-ENV PYPOLICYD_SPF_VERSION 1.3.1
-ENV CLAMAV_VERSION 0.98.7
-ENV AMAVISD_NEW_VERSION 2.10.1
-ENV GREYLIST_VERSION 4.5.14
+ENV POSTFIX_VERSION=3.0.2 \
+    DOVECOT_MAIN=2.2 \
+    DOVECOT_VERSION=2.2.18 \
+    DOVECOT_PIGEONHOLE=0.4.8 \
+    OPENDKIM_VERSION=2.10.3 \
+    PYPOLICYD_SPF_MAIN=1.3 \
+    PYPOLICYD_SPF_VERSION=1.3.1 \
+    CLAMAV_VERSION=0.98.7 \
+    AMAVISD_NEW_VERSION=2.10.1 \
+    GREYLIST_VERSION=4.5.14
 
 RUN touch ${INSTALL_LOG} && \
     groupadd -g 1000 vmail && useradd -g vmail -u 1000 vmail -d /var/vmail && \
@@ -46,7 +47,7 @@ RUN addgroup --quiet clamav && addgroup --quiet amavis && \
     mkdir -p /var/run/clamav /var/lib/clamav /var/log/clamav && \
     chown -R clamav:clamav /var/run/clamav /var/lib/clamav /var/log/clamav && \
     mkdir -p /usr/src/build/clamav && cd /usr/src/build/clamav && \
-    curl -L http://sourceforge.net/projects/clamav/files/clamav/${CLAMAV_VERSION}/clamav-${CLAMAV_VERSION}.tar.gz/download | tar zx --strip-components=1 && \
+    curl -sL http://sourceforge.net/projects/clamav/files/clamav/${CLAMAV_VERSION}/clamav-${CLAMAV_VERSION}.tar.gz/download | tar zx --strip-components=1 && \
     ./configure --prefix=/usr --sysconfdir=/etc --with-working-dir=/var/lib/amavis 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make install 2>&1 | tee -a ${INSTALL_LOG} > /dev/null
 
 # Bitdefender
@@ -65,7 +66,7 @@ RUN mkdir -p /var/run/amavis /var/lib/amavis/tmp /var/lib/amavis/db /var/lib/ama
     chown -R amavis:amavis /var/run/amavis /var/lib/amavis && \
     chmod -R 770 /var/lib/amavis && chown -R 770 /var/lib/amavis/tmp && \
     mkdir -p /usr/src/build/amavisd-new && cd /usr/src/build/amavisd-new && \
-    curl http://mirror.omroep.nl/amavisd-new/amavisd-new-${AMAVISD_NEW_VERSION}.tar.xz | tar Jx --strip-components=1 && \
+    curl -sL http://mirror.omroep.nl/amavisd-new/amavisd-new-${AMAVISD_NEW_VERSION}.tar.xz | tar Jx --strip-components=1 && \
     cp amavisd /usr/sbin/amavisd-new && chown root:root /usr/sbin/amavisd-new && chmod 755 /usr/sbin/amavisd-new && \
     cp amavisd-nanny /usr/sbin/amavisd-nanny && chown root:root /usr/sbin/amavisd-nanny && chmod 755 /usr/sbin/amavisd-nanny && \
     cp amavisd-release /usr/sbin/amavisd-release && chown root:root /usr/sbin/amavisd-release && chmod 755 /usr/sbin/amavisd-release && \
@@ -77,13 +78,13 @@ RUN chown root:root /etc/amavis -R
 
 # Amavisd-milter
 RUN mkdir -p /usr/src/build/amavisd-milter && cd /usr/src/build/amavisd-milter && \
-    curl -L http://sourceforge.net/projects/amavisd-milter/files/latest/download | tar zx --strip-components=1 && \
+    curl -sL http://sourceforge.net/projects/amavisd-milter/files/latest/download | tar zx --strip-components=1 && \
     ./configure --with-working-dir=/var/lib/amavis/tmp --prefix=/usr 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make install 2>&1 | tee -a ${INSTALL_LOG} > /dev/null
 
 # Postfix 3.0.2
 RUN mkdir -p /usr/src/build/postfix && cd /usr/src/build/postfix && \
     useradd postfix && useradd postdrop && \
-    curl -L http://mirror.lhsolutions.nl/postfix-release/official/postfix-${POSTFIX_VERSION}.tar.gz | tar zx --strip-components=1 && \
+    curl -sL http://mirror.lhsolutions.nl/postfix-release/official/postfix-${POSTFIX_VERSION}.tar.gz | tar zx --strip-components=1 && \
     make -f Makefile.init "CCARGS=-DHAS_MYSQL -DHAS_PCRE -I/usr/include/mysql $(pcre-config --cflags) -DUSE_SASL_AUTH -DUSE_TLS" "AUXLIBS_MYSQL=-L/usr/include/mysql -lmysqlclient -lz -lm $(pcre-config --libs) -lssl -lcrypto" 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && \
     sh ./postfix-install -non-interactive install_root=/ 2>&1 | tee -a ${INSTALL_LOG} > /dev/null
 
@@ -94,12 +95,12 @@ RUN chmod 640 /etc/postfix -R
 # Dovecot
 RUN useradd dovenull && useradd dovecot && \
     mkdir -p /usr/src/build/dovecot && cd /usr/src/build/dovecot && \
-    curl -L http://dovecot.org/releases/2.2/dovecot-${DOVECOT_VERSION}.tar.gz | tar zx --strip-components=1 && \
+    curl -sL http://dovecot.org/releases/2.2/dovecot-${DOVECOT_VERSION}.tar.gz | tar zx --strip-components=1 && \
     ./configure --prefix=/usr --sysconfdir=/etc --with-mysql --with-ssl --without-shared-libs 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make install 2>&1 | tee -a ${INSTALL_LOG} > /dev/null
 
 # Dovecot Sieve / ManageSieve
 RUN mkdir -p /usr/src/build/pigeonhole && cd /usr/src/build/pigeonhole && \
-    curl -L http://pigeonhole.dovecot.org/releases/${DOVECOT_MAIN}/dovecot-${DOVECOT_MAIN}-pigeonhole-${DOVECOT_PIGEONHOLE}.tar.gz | tar zx --strip-components=1 && \
+    curl -sL http://pigeonhole.dovecot.org/releases/${DOVECOT_MAIN}/dovecot-${DOVECOT_MAIN}-pigeonhole-${DOVECOT_PIGEONHOLE}.tar.gz | tar zx --strip-components=1 && \
     ./configure --prefix=/usr --sysconfdir=/etc 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make install 2>&1 | tee -a ${INSTALL_LOG} > /dev/null
 
 ADD resources/dovecot /etc/dovecot
@@ -110,7 +111,7 @@ ADD resources/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
 
 # Greylist
 RUN mkdir -p /usr/src/build/greylist && cd /usr/src/build/greylist && \
-    curl ftp://ftp.espci.fr/pub/milter-greylist/milter-greylist-${GREYLIST_VERSION}.tgz | tar zx --strip-components=1 && \
+    curl -sL ftp://ftp.espci.fr/pub/milter-greylist/milter-greylist-${GREYLIST_VERSION}.tgz | tar zx --strip-components=1 && \
     LDFLAGS="-L/usr/lib/libmilter" CFLAGS="-I/usr/include/libmilter" \
     ./configure \
         --enable-dnsrbl \
@@ -133,7 +134,7 @@ ADD resources/greylist /etc/greylist
 # OpenDKIM
 RUN useradd opendkim && \
     mkdir -p /usr/src/build/opendkim && cd /usr/src/build/opendkim && \
-    curl -L http://sourceforge.net/projects/opendkim/files/opendkim-${OPENDKIM_VERSION}.tar.gz/download | tar zx --strip-components=1 && \
+    curl -sL http://sourceforge.net/projects/opendkim/files/opendkim-${OPENDKIM_VERSION}.tar.gz/download | tar zx --strip-components=1 && \
     ./configure --prefix=/usr 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make install 2>&1 | tee -a ${INSTALL_LOG} > /dev/null
 
 ADD resources/opendkim /etc/opendkim
@@ -148,7 +149,7 @@ ADD resources/policy-spf/policyd-spf.conf /etc/postfix-policyd-spf-python/policy
 
 # OpenDMARC
 RUN mkdir -p /usr/src/build/opendmarc && cd /usr/src/build/opendmarc && \
-    curl -L http://sourceforge.net/projects/opendmarc/files/latest/download | tar zx --strip-components=1 && \
+    curl -sL http://sourceforge.net/projects/opendmarc/files/latest/download | tar zx --strip-components=1 && \
     ./configure --prefix=/usr --with-spf --with-sql-backend 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make install 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && \
     useradd opendmarc && \
     mkdir -p /var/run/opendmarc && \
@@ -175,7 +176,7 @@ ADD resources/mailman3/mailman.d/* /etc/mailman.d/
 
 # Milter Manager
 RUN mkdir -p /usr/src/build/milter-manager && cd /usr/src/build/milter-manager && \
-    curl -L http://sourceforge.net/projects/milter-manager/files/milter%20manager/2.0.5/milter-manager-2.0.5.tar.gz/download | tar zx --strip-components=1 && \
+    curl -sL http://sourceforge.net/projects/milter-manager/files/milter%20manager/2.0.5/milter-manager-2.0.5.tar.gz/download | tar zx --strip-components=1 && \
     ./configure --prefix=/usr --sysconfdir=/etc 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && make install 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && \
     rm -fr /etc/milter-manager
 
@@ -193,6 +194,6 @@ RUN tar czf /root/build.tgz /usr/src/build --remove-files && \
 EXPOSE 587 25 465 4190 995 993 110 143
 VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/opendmarc", "/var/mailman"]
 
-WORKDIR /
+WORKDIR ${HOME}
 
 CMD ["/usr/local/bin/run"]

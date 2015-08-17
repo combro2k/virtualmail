@@ -81,7 +81,8 @@ echo '# Amavisd-milter' | tee -a ${INSTALL_LOG} > /dev/null && \
 echo '# Postfix 3.0.2' | tee -a ${INSTALL_LOG} > /dev/null && \
     mkdir -p /usr/src/build/postfix && cd /usr/src/build/postfix && \
     useradd postfix && useradd postdrop && \
-    curl -sL http://mirror.lhsolutions.nl/postfix-release/official/postfix-${POSTFIX_VERSION}.tar.gz | tar zx --strip-components=1 && \ make -f Makefile.init \
+    curl -sL http://mirror.lhsolutions.nl/postfix-release/official/postfix-${POSTFIX_VERSION}.tar.gz | tar zx --strip-components=1 && \
+    make -f Makefile.init \
         "CCARGS=-DHAS_MYSQL -DHAS_PCRE -I/usr/include/mysql $(pcre-config --cflags) -DUSE_SASL_AUTH -DUSE_TLS" \
         "AUXLIBS_MYSQL=-L/usr/include/mysql -lmysqlclient -lz -lm $(pcre-config --libs) -lssl -lcrypto" 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && \
     sh ./postfix-install -non-interactive install_root=/ 2>&1 | tee -a ${INSTALL_LOG} > /dev/null && \

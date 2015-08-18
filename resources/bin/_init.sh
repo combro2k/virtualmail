@@ -25,13 +25,20 @@ do
     sed -i "s/mail.example.org/${HOSTNAME}/g" ${file}
 done
 
-test ! -f "/etc/aliases" && touch /etc/aliases && /usr/bin/newaliases
-test ! -d "/var/run/clamav/" && mkdir -p /var/run/clamav/ && chown clamav:clamav /var/run/clamav && chown -R clamav:clamav /var/lib/clamav/
-test ! -d "/etc/dovecot/sieve" && mkdir -p /etc/dovecot/sieve/global && touch /etc/dovecot/sieve/default.sieve && chown -R vmail:vmail /etc/dovecot/sieve
-test ! -G "/etc/amavis/*.*" -o ! -G "/etc/amavis/*/*" && chown root:root /etc/amavis -R
+# Create directories if they aren't created
+[ ! -f "/etc/aliases" ] && touch /etc/aliases && /usr/bin/newaliases
+[ ! -d "/var/run/clamav/" ] && mkdir -p /var/run/clamav/ && chown clamav:clamav /var/run/clamav
+[ ! -d "/var/lib/clamav/" ] && mkdir -p /var/lib/clamav/ && chown -R clamav:clamav /var/lib/clamav/ &&
+[ ! -d "/var/run/dovecot/" ] && mkdir -p /var/run/dovecot/ && chown dovecot:dovecot /var/run/clamav
+[ ! -d "/etc/dovecot/sieve" ] && mkdir -p /etc/dovecot/sieve/global && touch /etc/dovecot/sieve/default.sieve && chown -R vmail:vmail /etc/dovecot/sieve
 
-[[ "$(stat -c %a /etc/postfix)" -ne "640" ]] && chmod 640 /etc/postfix -R
-
+# Initialise freshclam
 /usr/bin/freshclam --quiet --config-file=/etc/clamav/freshclam.conf
+
+# Fix permissions etc
+[ "$(stat -c '%U:%G' /etc/opendkim)" != "opendkim:opendkim" ] && chown -R opendkim:opendkim /etc/opendkim
+([ ! -G "/etc/amavis/*.*" ] || [ ! -G "/etc/amavis/*/*" ]) && chown root:root /etc/amavis -R
+[ "$(stat -c %U:%G /etc/postfix)" != "root:root" ] && chown root:root /etc/postfix -R
+[ "$(stat -c %a /etc/postfix)" -ne "640" ] && chmod 640 /etc/postfix -R
 
 touch /root/.init

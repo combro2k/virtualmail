@@ -242,4 +242,4 @@ install() {
     make && make install
 }
 
-install 2>&1 >> ${INSTALL_LOG}
+install 2>&1 | tee -a ${INSTALL_LOG}

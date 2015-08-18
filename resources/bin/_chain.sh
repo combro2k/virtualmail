@@ -7,8 +7,8 @@ set -e
 # Start the base services
 supervisorctl start rsyslog
 supervisorctl start cron
-supervisorctl filters:
-supervisorctl mail:
+supervisorctl start filters:
+supervisorctl start mail:
 
 # Start mailman if the mailman variable is set
 test -f "/root/.mailman_init" && supervisorctl start mailman:

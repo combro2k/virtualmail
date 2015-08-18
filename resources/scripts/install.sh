@@ -155,8 +155,7 @@ install() {
 
     echo '# Amavisd-milter'
     cd /usr/src/build/amavisd-milter
-    # http://netcologne.dl.sourceforge.net/project/amavisd-milter/amavisd-milter/amavisd-milter-${AMAVISD_MILTER}/amavisd-milter-${AMAVISD_MILTER}.tar.gz
-    curl -sL http://sourceforge.net/projects/amavisd-milter/files/latest/download | tar zx --strip-components=1
+    curl -sL http://netcologne.dl.sourceforge.net/project/amavisd-milter/amavisd-milter/amavisd-milter-${AMAVISD_MILTER}/amavisd-milter-${AMAVISD_MILTER}.tar.gz | tar zx --strip-components=1
     ./configure --with-working-dir=/var/lib/amavis/tmp --prefix=/usr
     make && make install
 

@@ -24,16 +24,17 @@ ENV POSTFIX_VERSION=3.0.2 \
 # Add resources
 ADD resources/scripts /root/scripts/
 
-RUN /bin/bash /root/scripts/install.sh > ${INSTALL_LOG} 2>&1 && rm /root/scripts/install.sh
+RUN touch ${INSTALL_LOG} && /bin/bash /root/scripts/install.sh
 
 ADD resources/etc/ /etc/
 ADD resources/opt/ /opt/
 ADD resources/bin/ /usr/local/bin/
 
 # Run the last bits and clean up
-RUN /bin/bash /root/postinstall.sh > ${INSTALL_LOG} 2>&1
+RUN /bin/bash /root/scripts/postinstall.sh && rm -fr /root/scripts
 
 EXPOSE 25 80 110 143 465 587 993 995 4190
+
 VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/opendmarc", "/var/mailman", "/etc/mailman"]
 
 CMD ["/usr/local/bin/run"]

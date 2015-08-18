@@ -21,20 +21,17 @@ ENV POSTFIX_VERSION=3.0.2 \
     OPENDMARC_VERSION=1.3.1 \
     MILTER_MANAGER_VERSION=2.0.5
 
-ADD ["resources/scripts/_install.sh", "resources/scripts/_postinstall.sh", "/root/"]
-
-RUN touch ${INSTALL_LOG} && \
-    chmod +x /root/_install.sh /root/_postinstall.sh && \
-    /root/_install.sh 2>&1 >> ${INSTALL_LOG}
-
 # Add resources
+ADD resources/scripts /root/scripts/
+
+RUN /bin/bash /root/scripts/install.sh > ${INSTALL_LOG} 2>&1 && rm /root/scripts/install.sh
+
 ADD resources/etc/ /etc/
 ADD resources/opt/ /opt/
 ADD resources/bin/ /usr/local/bin/
 
 # Run the last bits and clean up
-RUN /root/_postinstall.sh 2>&1 >> ${INSTALL_LOG} && \
-    rm /root/_postinstall.sh /root/_install.sh
+RUN /bin/bash /root/postinstall.sh > ${INSTALL_LOG} 2>&1
 
 EXPOSE 25 80 110 143 465 587 993 995 4190
 VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/opendmarc", "/var/mailman", "/etc/mailman"]

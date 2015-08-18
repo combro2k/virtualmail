@@ -171,8 +171,9 @@ install() {
     cd /usr/src/build/dovecot
     useradd dovenull
     useradd dovecot
-    DOVECOT_MAIN=$(IFS='.' read -ra PARSE <<< "${DOVECOT_VERSION}"; echo "${PARSE[0]}.${PARSE[1]}") \
-        curl -sL http://dovecot.org/releases/${DOVECOT_MAIN}/dovecot-${DOVECOT_VERSION}.tar.gz | tar zx --strip-components=1
+    IFS='.' read -ra PARSE <<< "${DOVECOT_VERSION}"
+    DOVECOT_MAIN=$(echo "${PARSE[0]}.${PARSE[1]}")
+    curl -sL http://dovecot.org/releases/${DOVECOT_MAIN}/dovecot-${DOVECOT_VERSION}.tar.gz | tar zx --strip-components=1
     ./configure --prefix=/usr --sysconfdir=/etc --with-mysql --with-ssl --without-shared-libs
     make && make install
 

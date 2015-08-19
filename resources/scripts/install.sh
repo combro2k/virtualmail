@@ -85,6 +85,7 @@ packages=(
 )
 
 install() {
+    trap 'echo trapped; break' ERR   # Set ERR trap 
     echo '# Setup virtualmail user'
     adduser --system --group --uid 1000 --home /var/vmail --disabled-password vmail
 
@@ -243,4 +244,4 @@ install() {
     make && make install
 }
 
-install 2>&1 | tee -a ${INSTALL_LOG}
+install | tee -a ${INSTALL_LOG}

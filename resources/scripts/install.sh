@@ -11,7 +11,7 @@ e () {
     # $BASH_COMMAND contains the command that was being executed at the time of the trap
     # ${BASH_LINENO[0]} contains the line number in the script of that command
     # exit the script or return to try again, etc.
-    exit $errcode  # or use some other value or do return instead
+    exit 1  # or use some other value or do return instead
 }
 
 trap e ERR
@@ -248,7 +248,7 @@ install() {
     /opt/mailman/bin/python -c 'import pip, subprocess; [subprocess.call("/opt/mailman/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]'
     virtualenv --system-site-packages -p python2.7 /opt/postorius
     /opt/postorius/bin/pip install -U --pre django-gravatar flup postorius Whoosh mock beautifulsoup4 hyperkitty python-openid python-social-auth django-browserid
-    /opt/postorius/bin/pip -c 'import pip, subprocess; [subprocess.call("/opt/mailman/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]'
+    /opt/postorius/bin/python -c 'import pip, subprocess; [subprocess.call("/opt/postorius/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]'
     ln -s /usr/bin/nodejs /usr/bin/node
     rm /etc/nginx/conf.d/default.conf
 
@@ -259,4 +259,4 @@ install() {
     make && make install
 }
 
-install | tee -a ${INSTALL_LOG}
+install > ${INSTALL_LOG} 2>&1

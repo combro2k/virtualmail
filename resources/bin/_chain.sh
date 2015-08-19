@@ -2,7 +2,7 @@
 set -e
 
 # First cleanup all the mess!
-. /usr/local/bin/_cleanup.sh
+/usr/local/bin/_cleanup.sh
 
 # Start the base services
 supervisorctl start rsyslog

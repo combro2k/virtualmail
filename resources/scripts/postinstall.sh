@@ -36,4 +36,4 @@ postinstall() {
 	rm -fr /var/lib/apt /usr/src/build
 }
 
-postinstall 2>&1 | tee -a ${INSTALL_LOG}
+postinstall 2>&1 | tee -a ${INSTALL_LOG} > /dev/null

@@ -7,10 +7,6 @@ e () {
     echo "the command executing at the time of the error was"
     echo "$BASH_COMMAND"
     echo "on line ${BASH_LINENO[0]}"
-    # do some error handling, cleanup, logging, notification
-    # $BASH_COMMAND contains the command that was being executed at the time of the trap
-    # ${BASH_LINENO[0]} contains the line number in the script of that command
-    # exit the script or return to try again, etc.
     exit 1  # or use some other value or do return instead
 }
 
@@ -128,7 +124,7 @@ install() {
 
     echo '# APT update, upgrade and install packages'
     DEBIAN_FRONTEND=noninteractive apt-get update
-    DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -yqq
+#    DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -yqq
     DEBIAN_FRONTEND=noninteractive apt-get install -yqq ${packages[@]}
 
     echo '# System global pip'

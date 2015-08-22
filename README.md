@@ -58,8 +58,3 @@ A summary of this container: “The virtualmail container deploys and configures
 You can extract all the default configs for example:
 
     tar zxvf ~/root/config.tar.gz -C / /etc/mailman
-
-### Source
-You can extract all used source for example:
-
-    tar zxvf ~/root/build.tar.gz -C /usr/src/build amavisd-new

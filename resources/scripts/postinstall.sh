@@ -29,11 +29,11 @@ postinstall() {
 	chmod +x /usr/local/bin/*
 
 	echo '# Create source archive'
-	tar --numeric-owner --create --auto-compress --file "/root/build.tar.gz" --directory "/usr/src/build" --transform='s,^./,,' .
+#	tar --numeric-owner --create --auto-compress --file "/root/build.tar.gz" --directory "/usr/src/build" --transform='s,^./,,' .
 
 	echo '# Cleanup APT'
 	apt-get clean
-	rm -fr /var/lib/apt /usr/src/build
+	rm -fr /var/lib/apt #/usr/src/build
 }
 
 postinstall 2>&1 | tee -a ${INSTALL_LOG} > /dev/null

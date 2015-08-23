@@ -1,4 +1,4 @@
-FROM combro2k/ubuntu-debootstrap:14.04
+FROM combro2k/debian-debootstrap:8
 
 MAINTAINER Martijn van Maurik <docker@vmaurik.nl>
 

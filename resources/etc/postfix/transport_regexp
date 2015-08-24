@@ -1,2 +1,0 @@
-/^.*-owner\@mail\.example\.org$/ sympabounce:
-/^.*\@mail\.example\.org$/       sympa:

@@ -125,7 +125,6 @@ install() {
 
     echo '# APT update, upgrade and install packages'
     DEBIAN_FRONTEND=noninteractive apt-get update
-#    DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -yqq
     DEBIAN_FRONTEND=noninteractive apt-get install -yqq ${packages[@]}
 
     echo '# System global pip'
@@ -252,7 +251,7 @@ install() {
     echo '# Milter Manager'
     cd /usr/src/build/milter-manager
     curl -sL http://netcologne.dl.sourceforge.net/project/milter-manager/milter%20manager/${MILTER_MANAGER_VERSION}/milter-manager-${MILTER_MANAGER_VERSION}.tar.gz | tar zx --strip-components=1
-    ./configure --prefix=/usr --sysconfdir=/etc
+    ./configure --prefix=/usr --sysconfdir=/etc --with-package-platform=debian
     make && make install
 }
 

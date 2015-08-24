@@ -73,7 +73,6 @@ smtpd_recipient_restrictions = permit_sasl_authenticated,
   reject_rbl_client psbl.surriel.com,
   reject_rbl_client ix.dnsbl.manitu.net,
   check_policy_service unix:private/policy-spf,
-  check_policy_service unix:postgrey/socket,
   permit
 
 # authentication

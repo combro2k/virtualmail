@@ -1,6 +1,18 @@
 #!/bin/bash
 set -e
 
+e () {
+    errcode=$? # save the exit code as the first thing done in the trap function
+    echo "error $errorcode"
+    echo "the command executing at the time of the error was"
+    echo "$BASH_COMMAND"
+    echo "on line ${BASH_LINENO[0]}"
+    tail -n 25 ${INSTALL_LOG}
+    exit 1  # or use some other value or do return instead
+}
+
+trap e ERR
+
 configs=(
 	'/etc/amavis'
 	'/etc/clamav'

@@ -249,8 +249,13 @@ install() {
     rm /etc/nginx/conf.d/default.conf
 
     echo '# Milter Manager'
+    rm -fr /usr/src/build/milter-manager
+    curl -sL https://github.com/milter-manager/milter-manager/archive/master.zip -o /usr/src/build/milter-manager-master.zip
+    unzip /usr/src/build/milter-manager-master.zip -d /usr/src/build
+    mv /usr/src/milter-manager-master /usr/src/build/milter-manager
     cd /usr/src/build/milter-manager
-    curl -sL http://netcologne.dl.sourceforge.net/project/milter-manager/milter%20manager/${MILTER_MANAGER_VERSION}/milter-manager-${MILTER_MANAGER_VERSION}.tar.gz | tar zx --strip-components=1
+    rm /usr/src/build/milter-manager-master.zip
+    ./autogen.sh
     ./configure --prefix=/usr --sysconfdir=/etc --with-package-platform=debian
     make && make install
 }

@@ -15,7 +15,7 @@ setgid_group = postdrop
 delay_warning_time = 4
 #smtpd_delay_reject = no
 
-smtpd_banner = $myhostname ESMTP $mail_name (Ubuntu)
+smtpd_banner = $myhostname ESMTP $mail_name
 biff = no
 
 # appending .domain is the MUA's job.
@@ -104,5 +104,7 @@ virtual_uid_maps = static:1000
 policy-spf_time_limit=3600s
 inet_protocols=all
 
+milter_default_action = accept
+milter_protocol = 6
+milter_mail_macros = {auth_author} {auth_type} {auth_authen}
 smtpd_milters=inet:[127.0.0.1]:10025
-non_smtpd_milters=$smtpd_milters

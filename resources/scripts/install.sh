@@ -23,6 +23,7 @@ packages=(
 	'cron'
 	'curl'
 	'fcgiwrap'
+        'git'
 	'flex'
 	'intltool'
 	'less'

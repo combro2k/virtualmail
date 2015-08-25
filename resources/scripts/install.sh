@@ -251,7 +251,7 @@ install() {
     echo '# Milter Manager'
     cd /usr/src/build/milter-manager
     curl -sL https://github.com/milter-manager/milter-manager/archive/master.tar.gz | tar zx --strip-components=1
-    [ ! -f ./configure ]] && ./autogen.sh
+    [ ! -f ./configure ] && ./autogen.sh
     ./configure --prefix=/usr --sysconfdir=/etc --with-package-platform=debian
     make
     make install

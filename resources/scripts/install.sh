@@ -257,4 +257,5 @@ install() {
     make install
 }
 
-install > ${INSTALL_LOG} 2>&1
+install  
+#> ${INSTALL_LOG} 2>&1

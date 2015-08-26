@@ -136,7 +136,7 @@ post_install() {
 
 	chmod +x /usr/local/bin/*
 
-	tar --numeric-owner --create --auto-compress --file "/root/build.tar.gz" --directory "/usr/src/build" --transform='s,^./,,' .
+	#tar --numeric-owner --create --auto-compress --file "/root/build.tar.gz" --directory "/usr/src/build" --transform='s,^./,,' .
 
 	apt-get clean
 	rm -fr /var/lib/apt /usr/src/build

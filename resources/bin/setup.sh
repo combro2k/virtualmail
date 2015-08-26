@@ -303,7 +303,7 @@ build() {
 
 	tasks=(
 		'pre_install'
-		'create_user'
+		'create_users'
 		'clamav'
 		'bitdefender'
 		'spamassassin'

@@ -310,7 +310,7 @@ build() {
 
 	for task in ${tasks[@]}
 	do
-		echo "Running ${task}..."
+		echo "Running build task ${task}..."
 		${task} | tee -a "${INSTALL_LOG}" 2>&1 > /dev/null || exit 1
 	done
 }

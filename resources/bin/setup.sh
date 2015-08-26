@@ -1,5 +1,5 @@
 #!/bin/bash
-set -TEa
+set -Ea
 
 trap '{ echo -e "error ${?}\nthe command executing at the time of the error was\n${BASH_COMMAND}\non line ${BASH_LINENO[0]}" && tail -n 10 ${INSTALL_LOG} && exit $? }' ERR
 
@@ -63,6 +63,7 @@ packages=(
     'libssl-dev'
     'libtemplate-perl'
     'libterm-progressbar-perl'
+    'libtool'
     'libunix-syslog-perl'
     'libxml-libxml-perl'
     'nano'
@@ -79,7 +80,6 @@ packages=(
     'pyzor'
     'razor'
     'rsyslog'
-    'ruby-dev'
     'ssl-cert'
     'supervisor'
     'unzip'
@@ -140,25 +140,28 @@ post_install() {
 	tar --numeric-owner --create --auto-compress --file "/root/build.tar.gz" --directory "/usr/src/build" --transform='s,^./,,' .
 
 	apt-get clean
-	rm -fr /var/lib/apt #/usr/src/build
+	rm -fr /var/lib/apt /usr/src/build
 }
 
-create_user() {
-	adduser --system --group --uid 1000 --home /var/vmail --disabled-password vmail
+create_users() {
+	adduser --quiet --system --group --comment 'Virtualmail User' --uid 1000 --home /var/vmail --shell /usr/sbin/nologin --disabled-password vmail
+	adduser --quiet --system --group --comment 'Clamav Daemon User' --no-create-home --shell /usr/sbin/nologin --disabled-password clamav
+	adduser --quiet --system --group --comment 'Amavisd Daemon User' --no-create-home --shell /usr/sbin/nologin --disabled-password amavis
+	adduser --quiet --system --group --comment 'Postfix Daemon User' --no-create-home --shell /usr/sbin/nologin --disabled-password postfix
+	adduser --quiet --system --group --comment 'Postfix Daemon Helper' --no-create-home --shell /usr/sbin/nologin --disabled-password postdrop
+	adduser --quiet --system --group --comment 'Dovecot Daemon Helper' --no-create-home --shell /usr/sbin/nologin --disabled-password dovenull
+	adduser --quiet --system --group --comment 'Dovecot Daemon User' --no-create-home --shell /usr/sbin/nologin --disabled-password dovecot
+	adduser --quiet --system --group --comment 'OpenDKIM Daemon User' --no-create-home --shell /usr/sbin/nologin --disabled-password opendkim
+	adduser --quiet --system --group --comment 'OpenDMARC Daemon User' --no-create-home --shell /usr/sbin/nologin --disabled-password opendmarc
 }
 
 clamav() {
 	cd /usr/src/build/clamav
-	addgroup --quiet clamav && addgroup --quiet amavis
-	adduser --system --ingroup clamav --home /var/lib/clamav --quiet --shell /bin/sh --disabled-password clamav
-	adduser --system --ingroup amavis --home /var/lib/amavis --quiet --shell /bin/sh --disabled-password amavis
 	adduser --quiet clamav amavis
-	adduser --quiet amavis clamav
 	curl --silent -L http://netcologne.dl.sourceforge.net/project/clamav/clamav/${CLAMAV_VERSION}/clamav-${CLAMAV_VERSION}.tar.gz | tar zx --strip-components=1
 	./configure --prefix=/usr --sysconfdir=/etc --with-working-dir=/var/lib/amavis
 	make && make install
-	mkdir -p /var/run/clamav /var/lib/clamav /var/log/clamav
-	chown -R clamav:clamav /var/run/clamav /var/lib/clamav /var/log/clamav
+	mkdir -p /var/run/clamav /var/lib/clamav /var/log/clamav && chown -R clamav:clamav /var/run/clamav /var/lib/clamav /var/log/clamav
 }
 
 bitdefender() {
@@ -173,6 +176,7 @@ spamassassin() {
 
 amavisd() {
 	cd /usr/src/build/amavisd-new
+	adduser --quiet amavis clamav
 	mkdir -p /var/run/amavis /var/lib/amavis/tmp /var/lib/amavis/db /var/lib/amavis/virusmails
 	chown -R amavis:amavis /var/run/amavis /var/lib/amavis
 	chmod -R 770 /var/lib/amavis
@@ -193,8 +197,7 @@ amavisd() {
 
 postfix() {
 	cd /usr/src/build/postfix
-	useradd postfix
-	useradd postdrop
+
 	curl --silent -L http://de.postfix.org/ftpmirror/official/postfix-${POSTFIX_VERSION}.tar.gz | tar zx --strip-components=1
 	make -f Makefile.init "CCARGS=-DHAS_MYSQL -DHAS_PCRE -I/usr/include/mysql $(pcre-config --cflags) -DUSE_SASL_AUTH -DUSE_TLS" "AUXLIBS_MYSQL=-L/usr/include/mysql -lmysqlclient -lz -lm $(pcre-config --libs) -lssl -lcrypto"
 	sh ./postfix-install -non-interactive install_root=/
@@ -202,8 +205,6 @@ postfix() {
 
 dovecot() {
 	cd /usr/src/build/dovecot
-	useradd dovenull
-	useradd dovecot
 	IFS='.' read -ra PARSE <<< "${DOVECOT_VERSION}"
 	DOVECOT_MAIN=$(echo "${PARSE[0]}.${PARSE[1]}")
 	curl --silent -L http://dovecot.org/releases/${DOVECOT_MAIN}/dovecot-${DOVECOT_VERSION}.tar.gz | tar zx --strip-components=1
@@ -239,7 +240,6 @@ greylist() {
 
 opendkim() {
 	cd /usr/src/build/opendkim
-	useradd opendkim
 	curl --silent -L http://netcologne.dl.sourceforge.net/project/opendkim/opendkim-${OPENDKIM_VERSION}.tar.gz | tar zx --strip-components=1
 	./configure --prefix=/usr
 	make && make install
@@ -254,7 +254,6 @@ spf() {
 
 opendmarc() {
 	cd /usr/src/build/opendmarc
-	useradd opendmarc
 	curl --silent -L http://netcologne.dl.sourceforge.net/project/opendmarc/opendmarc-${OPENDMARC_VERSION}.tar.gz | tar zx --strip-components=1
 	./configure --prefix=/usr --with-spf --with-sql-backend
 	make && make install
@@ -276,6 +275,18 @@ mailman() {
 }
 
 milter_manager() {
+	gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3 2>&1 > /dev/null
+	curl --silent -L https://get.rvm.io | bash
+
+	if [ -f "/etc/profile.d/rvm.sh" ]
+	then
+		source /etc/profile.d/rvm.sh # load rvm if file exist
+	fi
+
+	rvm install 2.1.7 && rvm use 2.1.7
+	echo 'gem: --no-document' | tee ${APP_HOME}/.gemrc
+	gem install bundler
+
 	cd /usr/src/build/milter-manager
 	curl --silent -L https://github.com/milter-manager/milter-manager/archive/master.tar.gz | tar zx --strip-components=1
 	[ ! -f ./configure ] && ./autogen.sh

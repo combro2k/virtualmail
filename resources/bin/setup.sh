@@ -95,8 +95,8 @@ pre_install() {
 	echo 'deb http://download.bitdefender.com/repos/deb/ bitdefender non-free' | tee -a /etc/apt/sources.list 2>&1 > /dev/null
 	echo 'deb http://nginx.org/packages/mainline/ubuntu trusty nginx' | tee -a /etc/apt/sources.list 2>&1 > /dev/null
 
-	apt-get update
-	apt-get install -yqq ${packages[@]}
+	apt-get update -q
+	apt-get install -yq ${packages[@]}
 	easy_install3 pip
 	source=(
         '/usr/src/build/amavisd-milter'

@@ -21,16 +21,16 @@ ENV POSTFIX_VERSION=3.0.2 \
     OPENDMARC_VERSION=1.3.1
 
 # Add resources
-ADD resources/scripts /root/scripts/
-
-RUN touch ${INSTALL_LOG} && /bin/bash /root/scripts/install.sh
-
-ADD resources/etc/ /etc/
-ADD resources/opt/ /opt/
 ADD resources/bin/ /usr/local/bin/
 
+RUN touch ${INSTALL_LOG} && /bin/bash -l -c '/usr/local/bin/setup.sh build'
+
+# Add remaining resources
+ADD resources/etc/ /etc/
+ADD resources/opt/ /opt/
+
 # Run the last bits and clean up
-RUN /bin/bash /root/scripts/postinstall.sh && rm -fr /root/scripts
+RUN chmod +x /usr/local/bin/* && /bin/bash -l -c '/usr/local/bin/setup.sh post_install'
 
 EXPOSE 25 80 110 143 465 587 993 995 4190
 

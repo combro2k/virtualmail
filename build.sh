@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker build --rm --force-rm=true -t combro2k/postfix .
+docker build --no-cache --rm --force-rm=true -t combro2k/virtualmail .

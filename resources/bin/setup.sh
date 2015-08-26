@@ -278,9 +278,9 @@ milter_manager() {
 	gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3 2>&1 > /dev/null
 	curl --silent -L https://get.rvm.io | bash
 
-	if [ -f "/etc/profile.d/rvm.sh" ]
+	if [ -f "/usr/local/rvm/scripts/rvm" ]
 	then
-		source /etc/profile.d/rvm.sh # load rvm if file exist
+		source /usr/local/rvm/scripts/rvm
 	fi
 
 	rvm install 2.1.7 && rvm use 2.1.7
@@ -316,7 +316,6 @@ build() {
 		'opendmarc'
 		'mailman'
 		'milter_manager'
-		'post_install'
 	)
 
 	for task in ${tasks[@]}

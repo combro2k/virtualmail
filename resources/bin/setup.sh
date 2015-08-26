@@ -66,6 +66,7 @@ packages=(
 	'libunix-syslog-perl'
 	'libxml-libxml-perl'
 	'nano'
+	'net-tools'
 	'nginx'
 	'nodejs'
 	'nomarch'

@@ -89,8 +89,8 @@ packages=(
 )
 
 pre_install() {
-	apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62
-	apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A373FB480EC4FE05
+	apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 2>&1 > /dev/null
+	apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A373FB480EC4FE05 2>&1 > /dev/null
 
 	echo 'deb http://download.bitdefender.com/repos/deb/ bitdefender non-free' | tee -a /etc/apt/sources.list 2>&1 > /dev/null
 	echo 'deb http://nginx.org/packages/mainline/ubuntu trusty nginx' | tee -a /etc/apt/sources.list 2>&1 > /dev/null

@@ -8,11 +8,9 @@ files=(
     '/etc/amavis/amavis.conf'
     '/etc/dovecot/dovecot-sql.conf.ext'
     '/etc/spamassassin/sql.cf'
-    '/etc/postfix/main.cf'
     '/etc/postfix-policyd-spf-python/policyd-spf.conf'
     '/etc/opendmarc/opendmarc.conf'
     '/etc/opendkim/opendkim.conf'
-    '/etc/mailname'
 )
 
 echo "Initializing the container..."
@@ -24,6 +22,9 @@ do
     sed -i "s/__REPLACE_DATABASE_PASSWORD__/${POSTFIX_MYSQL_PASSWORD}/g" ${file}
     sed -i "s/mail.example.org/${HOSTNAME}/g" ${file}
 done
+
+postconf "myhostname = ${HOSTNAME}"
+echo ${HOSTNAME} > /etc/mailname
 
 # Create directories if they aren't created
 [ ! -f "/etc/aliases" ] && touch /etc/aliases && /usr/bin/newaliases

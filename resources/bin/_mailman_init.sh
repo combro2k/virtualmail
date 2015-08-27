@@ -52,4 +52,8 @@ then
     /opt/postorius_standalone/manage.py compress
 fi
 
+postconf 'relay_domains = $mydestination, hash:/var/mailman/data/postfix_domains'
+postconf 'transport_maps = hash:/var/mailman/data/postfix_lmtp'
+postconf 'local_recipient_maps = hash:/var/mailman/data/postfix_lmtp'
+
 touch /root/.mailman_init

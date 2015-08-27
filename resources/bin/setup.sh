@@ -2,8 +2,8 @@
 
 trap '{ echo -e "error ${?}\nthe command executing at the time of the error was\n${BASH_COMMAND}\non line ${BASH_LINENO[0]}" && tail -n 10 ${INSTALL_LOG} && exit $? }' ERR
 
-DEBIAN_FRONTEND=noninteractive
-packages=(
+export DEBIAN_FRONTEND=noninteractive
+export packages=(
 	'arj'
 	'bitdefender-scanner'
 	'build-essential'
@@ -86,7 +86,7 @@ packages=(
 	'vim'
 	'xz-utils'
 	'zip'
-	)
+)
 
 pre_install() {
 	apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 2>&1 > /dev/null
@@ -95,10 +95,12 @@ pre_install() {
 	echo 'deb http://download.bitdefender.com/repos/deb/ bitdefender non-free' | tee -a /etc/apt/sources.list 2>&1 > /dev/null
 	echo 'deb http://nginx.org/packages/mainline/ubuntu trusty nginx' | tee -a /etc/apt/sources.list 2>&1 > /dev/null
 
-	apt-get update -q
-	apt-get install -yq ${packages[@]}
-	easy_install3 pip
-	source=(
+	apt-get update -q 2>&1
+	apt-get install -yq ${packages[@]} 2>&1
+
+	easy_install3 pip 2>&1 > /dev/null
+
+	sources=(
 		'/usr/src/build/amavisd-milter'
 		'/usr/src/build/amavisd-new'
 		'/usr/src/build/clamav'
@@ -110,7 +112,8 @@ pre_install() {
 		'/usr/src/build/pigeonhole'
 		'/usr/src/build/postfix'
 	)
-	mkdir -vp ${source[@]}
+
+	mkdir -vp ${sources[@]}
 }
 
 post_install() {
@@ -131,13 +134,9 @@ post_install() {
 		'/etc/mailname'
 	)
 
-	tar --numeric-owner --create --auto-compress --file "/root/config.tar.gz" ${configs[@]}
+	tar --numeric-owner --create --auto-compress ${configs[@]} | gzip -9 - > /root/config.tar.gz
 
 	/usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
-
-	chmod +x /usr/local/bin/*
-
-	#tar --numeric-owner --create --auto-compress --file "/root/build.tar.gz" --directory "/usr/src/build" --transform='s,^./,,' .
 
 	apt-get clean
 	rm -fr /var/lib/apt /usr/src/build
@@ -159,9 +158,11 @@ clamav() {
 	cd /usr/src/build/clamav
 	adduser --quiet clamav amavis
 	curl --silent -L http://netcologne.dl.sourceforge.net/project/clamav/clamav/${CLAMAV_VERSION}/clamav-${CLAMAV_VERSION}.tar.gz | tar zx --strip-components=1
-	./configure --prefix=/usr --sysconfdir=/etc --with-working-dir=/var/lib/amavis
-	make && make install
-	mkdir -p /var/run/clamav /var/lib/clamav /var/log/clamav && chown -R clamav:clamav /var/run/clamav /var/lib/clamav /var/log/clamav
+	./configure --prefix=/usr --sysconfdir=/etc --with-working-dir=/var/lib/amavis 2>&1
+	make 2>&1
+	make install 2>&1
+	mkdir -p /var/run/clamav /var/lib/clamav /var/log/clamav
+	chown -R clamav:clamav /var/run/clamav /var/lib/clamav /var/log/clamav
 }
 
 bitdefender() {
@@ -169,9 +170,9 @@ bitdefender() {
 }
 
 spamassassin() {
-	cpan -f install Mail::SPF::Query
-	cpan -f install Mail::SpamAssassin
-	sa-update
+	cpan -f install Mail::SPF::Query 2>&1
+	cpan -f install Mail::SpamAssassin 2>&1
+	sa-update 2>&1
 }
 
 amavisd() {
@@ -191,16 +192,105 @@ amavisd() {
 
 	cd /usr/src/build/amavisd-milter
 	curl --silent -L http://netcologne.dl.sourceforge.net/project/amavisd-milter/amavisd-milter/amavisd-milter-${AMAVISD_MILTER}/amavisd-milter-${AMAVISD_MILTER}.tar.gz | tar zx --strip-components=1
-	./configure --with-working-dir=/var/lib/amavis/tmp --prefix=/usr
-	make && make install
+	./configure --with-working-dir=/var/lib/amavis/tmp --prefix=/usr 2>&1
+	make 2>&1
+	make install 2>&1
 }
 
 postfix() {
 	cd /usr/src/build/postfix
-
 	curl --silent -L http://de.postfix.org/ftpmirror/official/postfix-${POSTFIX_VERSION}.tar.gz | tar zx --strip-components=1
 	make -f Makefile.init "CCARGS=-DHAS_MYSQL -DHAS_PCRE -I/usr/include/mysql $(pcre-config --cflags) -DUSE_SASL_AUTH -DUSE_TLS" "AUXLIBS_MYSQL=-L/usr/include/mysql -lmysqlclient -lz -lm $(pcre-config --libs) -lssl -lcrypto"
 	sh ./postfix-install -non-interactive install_root=/
+}
+
+postfix_configure() {
+	main=(
+		'smtpd_tls_cert_file = /etc/ssl/certs/ssl-cert-snakeoil.pem'
+		'smtpd_tls_key_file = /etc/ssl/private/ssl-cert-snakeoil.key'
+		'smtpd_use_tls = yes'
+		'smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache'
+		'smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache'
+		'mydestination = $myhostname'
+		'relay_domains = $mydestination'
+		'myhostname = mail.example.org'
+		'recipient_delimiter = +'
+		'mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128'
+		'mailbox_size_limit = 0'
+		'inet_interfaces = all'
+		'soft_bounce = no'
+		'delay_warning_time = 4'
+		'setgid_group = postdrop'
+		'mail_owner = postfix'
+		'smtpd_banner = $myhostname ESMTP $mail_name'
+		'smtpd_helo_restrictions = permit_sasl_authenticated,permit_mynetworks,reject_non_fqdn_hostname,reject_invalid_hostname,permit'
+		'smtpd_sender_restrictions = permit_sasl_authenticated,reject_non_fqdn_sender,reject_unknown_sender_domain'
+		'smtpd_recipient_restrictions = permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination,reject_non_fqdn_recipient,reject_non_fqdn_hostname,reject_unknown_recipient_domain,reject_unknown_sender_domain,reject_rbl_client zen.spamhaus.org,reject_rbl_client dul.dnsbl.sorbs.net,reject_rbl_client bl.spamcop.net,reject_rbl_client b.barracudacentral.org,reject_rbl_client psbl.surriel.com,reject_rbl_client ix.dnsbl.manitu.net,check_policy_service unix:private/policy-spf,permit'
+		'smtpd_sasl_auth_enable = yes'
+		'smtpd_sasl_security_options = noanonymous'
+		'smtpd_sasl_local_domain = $mydomain'
+		'broken_sasl_auth_clients = yes'
+		'smtpd_sasl_type = dovecot'
+		'smtpd_sasl_path = private/auth'
+		'alias_maps = hash:/etc/aliases'
+		'alias_database = hash:/etc/aliases'
+		'dovecot_destination_recipient_limit = 1'
+		'virtual_alias_maps = mysql:/etc/postfix/mysql-virtual-alias-maps.cf'
+		'virtual_gid_maps = static:1000'
+		'virtual_mailbox_base = /var/vmail'
+		'virtual_mailbox_domains = mysql:/etc/postfix/mysql-virtual-domains-maps.cf'
+		'virtual_mailbox_maps = mysql:/etc/postfix/mysql-virtual-mailbox-maps.cf'
+		'virtual_minimum_uid = 1000'
+		'virtual_transport = dovecot'
+		'virtual_uid_maps = static:1000'
+		'policy-spf_time_limit = 3600s'
+		'inet_protocols = all'
+		'milter_default_action = accept'
+		'milter_protocol = 6'
+		'milter_mail_macros = {auth_author} {auth_type} {auth_authen}'
+		'smtpd_milters = inet:[127.0.0.1]:10025'
+	)
+
+	for m in "${main[@]}"
+	do
+		postconf -e "${m}"
+	done
+
+
+	sed -i 's/^#submission inet n       -       n       -       -       smtpd/submission inet n       -       n       -       -       smtpd/g' /etc/postfix/master.cf
+	sed -i 's/^#smtps     inet  n       -       n       -       -       smtpd/smtps     inet  n       -       n       -       -       smtpd/g' /etc/postfix/master.cf
+
+	cat <<EOF >> /etc/postfix/master.cf
+dovecot   unix  -       n       n       -       -       pipe
+  flags=DRhuuser=vmail:vmail argv=/usr/libexec/dovecot/deliver -f \${sender} -d \${recipient}
+EOF
+
+	cat <<EOF >> /etc/postfix/master.cf
+policy-spf  unix  -       n       n       -       -       spawn
+    user=nobody argv=/usr/bin/policyd-spf /etc/postfix-policyd-spf-python/policyd-spf.conf
+EOF
+
+	master=(
+		'submission/inet/syslog_name=postfix/submission'
+		'submission/inet/smtpd_tls_security_level=encrypt'
+		'submission/inet/smtpd_sasl_auth_enable=yes'
+		'submission/inet/smtpd_reject_unlisted_recipient=no'
+		'submission/inet/smtpd_recipient_restrictions='
+		'submission/inet/smtpd_relay_restrictions=permit_sasl_authenticated,reject'
+		'submission/inet/milter_macro_daemon_name=ORIGINATING'
+		'smtps/inet/syslog_name=postfix/smtps'
+		'smtps/inet/smtpd_tls_wrappermode=yes'
+		'smtps/inet/smtpd_sasl_auth_enable=yes'
+		'smtps/inet/smtpd_reject_unlisted_recipient=no'
+		'smtps/inet/smtpd_recipient_restrictions='
+		'smtps/inet/smtpd_relay_restrictions=permit_sasl_authenticated,reject'
+		'smtps/inet/milter_macro_daemon_name=ORIGINATING'
+	)
+
+	for m in "${master[@]}"
+	do
+		postconf -P "${m}"
+	done
 }
 
 dovecot() {
@@ -214,8 +304,9 @@ dovecot() {
 	echo '# Dovecot Sieve / ManageSieve'
 	cd /usr/src/build/pigeonhole
 	curl --silent -L http://pigeonhole.dovecot.org/releases/${DOVECOT_MAIN}/dovecot-${DOVECOT_MAIN}-pigeonhole-${DOVECOT_PIGEONHOLE}.tar.gz | tar zx --strip-components=1
-	./configure --prefix=/usr --sysconfdir=/etc
-	make && make install
+	./configure --prefix=/usr --sysconfdir=/etc 2>&1
+	make 2>&1
+	make install 2>&1
 }
 
 greylist() {
@@ -232,8 +323,9 @@ greylist() {
 		--with-libspf2 \
 		--enable-spamassassin \
 		--enable-p0f \
-		--with-delay=600
-	make && make install
+		--with-delay=600 2>&1
+	make 2>&1
+	make install 2>&1
 	mkdir -p /var/spool/postfix/{milter-greylist,greylist}
 	chown -R postfix:postfix /var/spool/postfix/{milter-greylist,greylist}
 }
@@ -241,22 +333,24 @@ greylist() {
 opendkim() {
 	cd /usr/src/build/opendkim
 	curl --silent -L http://netcologne.dl.sourceforge.net/project/opendkim/opendkim-${OPENDKIM_VERSION}.tar.gz | tar zx --strip-components=1
-	./configure --prefix=/usr
-	make && make install
+	./configure --prefix=/usr 2>&1
+	make 2>&1
+	make install 2>&1
 }
 
 spf() {
 	mkdir -p /etc/postfix-policyd-spf-python
-	pip install authres pyspf https://ipaddr-py.googlecode.com/files/ipaddr-2.1.5-py3k.tar.gz py3dns --pre
-	pip install https://launchpad.net/pypolicyd-spf/${PYPOLICYD_SPF_MAIN}/${PYPOLICYD_SPF_VERSION}/+download/pypolicyd-spf-${PYPOLICYD_SPF_VERSION}.tar.gz
+	pip install authres pyspf https://ipaddr-py.googlecode.com/files/ipaddr-2.1.5-py3k.tar.gz py3dns --pre 2>&1
+	pip install https://launchpad.net/pypolicyd-spf/${PYPOLICYD_SPF_MAIN}/${PYPOLICYD_SPF_VERSION}/+download/pypolicyd-spf-${PYPOLICYD_SPF_VERSION}.tar.gz 2>&1
 	mv /usr/local/bin/policyd-spf /usr/bin/policyd-spf
 }
 
 opendmarc() {
 	cd /usr/src/build/opendmarc
 	curl --silent -L http://netcologne.dl.sourceforge.net/project/opendmarc/opendmarc-${OPENDMARC_VERSION}.tar.gz | tar zx --strip-components=1
-	./configure --prefix=/usr --with-spf --with-sql-backend
-	make && make install
+	./configure --prefix=/usr --with-spf --with-sql-backend 2>&1
+	make 2>&1
+	make install 2>&1
 	mkdir -p /var/run/opendmarc
 	chown -R opendmarc:opendmarc /var/run/opendmarc
 }
@@ -264,12 +358,12 @@ opendmarc() {
 mailman() {
 	npm install -g less
 	mkdir -p /etc/mailman.d /var/log/mailman
-	virtualenv --system-site-packages -p python3.4 /opt/mailman
-	/opt/mailman/bin/pip install --pre -U mailman mailman-hyperkitty
-	/opt/mailman/bin/python -c 'import pip, subprocess; [subprocess.call("/opt/mailman/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]'
-	virtualenv --system-site-packages -p python2.7 /opt/postorius
-	/opt/postorius/bin/pip install -U --pre django-gravatar flup postorius Whoosh mock beautifulsoup4 hyperkitty python-openid python-social-auth django-browserid
-	/opt/postorius/bin/python -c 'import pip, subprocess; [subprocess.call("/opt/postorius/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]'
+	virtualenv --system-site-packages -p python3.4 /opt/mailman 2>&1
+	/opt/mailman/bin/pip install --pre -U mailman mailman-hyperkitty 2>&1
+	/opt/mailman/bin/python -c 'import pip, subprocess; [subprocess.call("/opt/mailman/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]' 2>&1
+	virtualenv --system-site-packages -p python2.7 /opt/postorius 2>&1
+	/opt/postorius/bin/pip install -U --pre django-gravatar flup postorius Whoosh mock beautifulsoup4 hyperkitty python-openid python-social-auth django-browserid 2>&1
+	/opt/postorius/bin/python -c 'import pip, subprocess; [subprocess.call("/opt/postorius/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]' 2>&1
 	ln -s /usr/bin/nodejs /usr/bin/node
 	rm /etc/nginx/conf.d/default.conf
 }
@@ -278,21 +372,19 @@ milter_manager() {
 	gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3 2>&1 > /dev/null
 	curl --silent -L https://get.rvm.io | bash
 
-	if [ -f "/usr/local/rvm/scripts/rvm" ]
-	then
-		source /usr/local/rvm/scripts/rvm
-	fi
+	/usr/local/rvm/bin/rvm install 2.1.7 2>&1
+	/usr/local/rvm/bin/rvm use 2.1.7 2>&1
 
-	rvm install 2.1.7 && rvm use 2.1.7
 	echo 'gem: --no-document' | tee ${APP_HOME}/.gemrc
-	gem install bundler
+
+	/usr/local/rvm/wrappers/default/gem install bundler 2>&1
 
 	cd /usr/src/build/milter-manager
 	curl --silent -L https://github.com/milter-manager/milter-manager/archive/master.tar.gz | tar zx --strip-components=1
-	[ ! -f ./configure ] && ./autogen.sh
-	./configure --prefix=/usr --sysconfdir=/etc --with-package-platform=debian
-	make
-	make install
+	[ ! -f ./configure ] && ./autogen.sh 2>&1
+	./configure --prefix=/usr --sysconfdir=/etc --with-package-platform=debian 2>&1
+	make 2>&1
+	make install 2>&1
 }
 
 build() {
@@ -302,13 +394,14 @@ build() {
 	fi
 
 	tasks=(
-		'pre_install'
 		'create_users'
+		'pre_install'
 		'clamav'
 		'bitdefender'
 		'spamassassin'
 		'amavisd'
 		'postfix'
+		'postfix_configure'
 		'dovecot'
 		'greylist'
 		'opendkim'

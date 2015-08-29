@@ -371,18 +371,18 @@ mailman() {
 milter_manager() {
 	gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3 2>&1 > /dev/null
 	curl --silent -L https://get.rvm.io | bash
-
-	/usr/local/rvm/bin/rvm install 2.1.7 2>&1
-	/usr/local/rvm/bin/rvm use 2.1.7 2>&1
+        /bin/bash -l -c 'rvm install 2.1.7'
+	/bin/bash -l -c 'rvm use 2.1.7'
+        /bin/bash -l -c 'rvm alias create default 2.1.7'
 
 	echo 'gem: --no-document' | tee ${APP_HOME}/.gemrc
 
-	/usr/local/rvm/wrappers/default/gem install bundler 2>&1
+	/bin/bash -l -c 'gem install bundler'
 
 	cd /usr/src/build/milter-manager
 	curl --silent -L https://github.com/milter-manager/milter-manager/archive/master.tar.gz | tar zx --strip-components=1
 	[ ! -f ./configure ] && ./autogen.sh 2>&1
-	./configure --prefix=/usr --sysconfdir=/etc --with-package-platform=debian 2>&1
+	/bin/bash -l -c './configure --prefix=/usr --sysconfdir=/etc --with-package-platform=debian'
 	make 2>&1
 	make install 2>&1
 }

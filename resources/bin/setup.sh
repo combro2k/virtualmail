@@ -68,7 +68,6 @@ export packages=(
 	'nano'
 	'net-tools'
 	'nginx'
-	'nodejs'
 	'nomarch'
 	'npm'
 	'pax'
@@ -368,23 +367,59 @@ mailman() {
 	rm /etc/nginx/conf.d/default.conf
 }
 
-milter_manager() {
-	gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3 2>&1 > /dev/null
+install_ruby_rvm()
+{
+    gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3 2>&1 > /dev/null
 	curl --silent -L https://get.rvm.io | bash
-        /bin/bash -l -c 'rvm install 2.1.7'
-	/bin/bash -l -c 'rvm use 2.1.7'
-        /bin/bash -l -c 'rvm alias create default 2.1.7'
 
+	source /etc/profile.d/rvm.sh
+
+    rvm install 2.1.7
+	rvm use 2.1.7
+    rvm alias create default 2.1.7
 	echo 'gem: --no-document' | tee ${APP_HOME}/.gemrc
+	gem install bundler
 
-	/bin/bash -l -c 'gem install bundler'
+	return 0
+}
 
+install_node_nvm(){
+    NVM_DIR="${HOME}/.nvm"
+    PATH="${PATH}:${HOME}/npm/bin"
+    NODE_PATH="${NODE_PATH}:${HOME}/npm/lib/node_modules"
+    curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+    # Add variables to the default nvm loader
+    echo '' >> $NVM_DIR/nvm.sh
+    echo '# Set default variables' >> $NVM_DIR/nvm.sh
+    echo "export PATH=\${PATH}:\${HOME}/npm/bin" >> $NVM_DIR/nvm.sh
+    echo "export NODE_PATH=\${NODE_PATH}:\${HOME}/npm/lib/node_modules" >> $NVM_DIR/nvm.sh
+
+    source "${NVM_DIR}/nvm.sh"
+
+    nvm install unstable
+    nvm alias default unstable
+    nvm use unstable
+
+    return 0
+}
+
+milter_manager() {
 	cd /usr/src/build/milter-manager
 	curl --silent -L https://github.com/milter-manager/milter-manager/archive/master.tar.gz | tar zx --strip-components=1
 	[ ! -f ./configure ] && ./autogen.sh 2>&1
 	/bin/bash -l -c './configure --prefix=/usr --sysconfdir=/etc --with-package-platform=debian'
 	make 2>&1
 	make install 2>&1
+
+	return 0
+}
+
+load_rvm()
+{
+    if [ -f "/etc/profile.d/rvm.sh" ]
+    then
+        source /etc/profile.d/rvm.sh
+    fi
 }
 
 build() {
@@ -408,13 +443,15 @@ build() {
 		'spf'
 		'opendmarc'
 		'mailman'
+		'install_ruby_rvm'
+	    'install_node_nvm'
 		'milter_manager'
 	)
 
 	for task in ${tasks[@]}
 	do
 		echo "Running build task ${task}..."
-		${task} | tee -a "${INSTALL_LOG}" 2>&1 > /dev/null || exit 1
+		${task} | tee -a "${INSTALL_LOG}" > /dev/null 2>&1 || exit 1
 	done
 }
 
@@ -428,6 +465,11 @@ then
 
 	exit 1
 else
+    if [ -z "${rvm_prefix}" ]
+    then
+        load_rvm
+    fi
+
 	for task in ${@}
 	do
 		echo "Running ${task}..."

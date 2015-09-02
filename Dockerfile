@@ -23,14 +23,14 @@ ENV POSTFIX_VERSION=3.0.2 \
 # Add resources
 ADD resources/bin/ /usr/local/bin/
 
-RUN touch ${INSTALL_LOG} && /bin/bash -l -c '/usr/local/bin/setup.sh build'
+RUN chmod +x /usr/local/bin/* && touch ${INSTALL_LOG} && /bin/bash -l -c '/usr/local/bin/setup.sh build'
 
 # Add remaining resources
 ADD resources/etc/ /etc/
 ADD resources/opt/ /opt/
 
 # Run the last bits and clean up
-RUN chmod +x /usr/local/bin/* && /bin/bash -l -c '/usr/local/bin/setup.sh post_install'
+RUN /bin/bash -l -c '/usr/local/bin/setup.sh post_install'
 
 EXPOSE 25 80 110 143 465 587 993 995 4190
 

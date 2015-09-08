@@ -30,7 +30,7 @@ ADD resources/etc/ /etc/
 ADD resources/opt/ /opt/
 
 # Run the last bits and clean up
-RUN /bin/bash -l -c '/usr/local/bin/setup.sh post_install' | tee -a ${INSTALL_LOG}
+RUN /bin/bash -l -c '/usr/local/bin/setup.sh post_install' | tee -a ${INSTALL_LOG} > /dev/null 2>&1
 
 EXPOSE 25 80 110 143 465 587 993 995 4190
 

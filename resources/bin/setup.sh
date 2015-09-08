@@ -358,10 +358,10 @@ mailman() {
 	npm install -g less
 	mkdir -p /etc/mailman.d /var/log/mailman
 	virtualenv --system-site-packages -p python3.4 /opt/mailman 2>&1
-	/opt/mailman/bin/pip install --pre -U mailman mailman-hyperkitty 2>&1
+	/opt/mailman/bin/pip install -I --pre -U mailman mailman-hyperkitty 2>&1
 	/opt/mailman/bin/python -c 'import pip, subprocess; [subprocess.call("/opt/mailman/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]' 2>&1
 	virtualenv --system-site-packages -p python2.7 /opt/postorius 2>&1
-	/opt/postorius/bin/pip install -U --pre django-gravatar flup postorius Whoosh mock beautifulsoup4 hyperkitty python-openid python-social-auth django-browserid 2>&1
+	/opt/postorius/bin/pip install -I -U --pre django-gravatar flup postorius Whoosh mock beautifulsoup4 hyperkitty python-openid python-social-auth django-browserid uwsgi django-uwsgi gunicorn==19.1 gevent django-xforwardedfor-middleware 2>&1
 	/opt/postorius/bin/python -c 'import pip, subprocess; [subprocess.call("/opt/postorius/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]' 2>&1
 	ln -s /usr/bin/nodejs /usr/bin/node
 	rm /etc/nginx/conf.d/default.conf

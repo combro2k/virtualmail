@@ -1,0 +1,9 @@
+bind = ['127.0.0.1:49152']
+proc_name = "postorius_standalone"
+chdir = "/opt/postorius_standalone"
+pidfile = "/var/run/gunicorn.pid-"
+accesslog = "/var/log/mailman/postorius.log"
+errorlog = "-"
+worker_class = "gevent"
+daemon = False
+forwarded_allow_ips = "172.17.42.1/16, 192.168.1.0/24, 2001:0db8::/32"

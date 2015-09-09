@@ -22,8 +22,22 @@ $ docker build -t combro2k/virtualmail https://github.com/combro2k/virtualmail.g
 ###### Use a linked database:
 ```bash
 $ docker run -d \
-  --link mysql:mysql
+  --link mysql:mysql \
   -e "POSTFIX_MYSQL_PASSWORD=postfixpassword" \
+  -h 'mail.example.org' \
+  -v /var/vmail:/var/vmail \
+  -P \
+  combro2k/virtualmail:latest
+```
+
+###### Add IPV6 support:
+```bash
+$ docker run -d \
+  --link mysql:mysql \
+  -e "POSTFIX_MYSQL_PASSWORD=postfixpassword" \
+  -e "IP6DEV=eth1" \
+  -e "IPV6ADDR=postfixpassword" \
+  -e "IPV6GW=postfixpassword" \
   -h 'mail.example.org' \
   -v /var/vmail:/var/vmail \
   -P \

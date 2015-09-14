@@ -137,6 +137,7 @@ post_install() {
 
 	/usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
 
+    apt-get autoremove
 	apt-get clean
 	rm -fr /var/lib/apt /usr/src/build
 }

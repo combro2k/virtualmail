@@ -112,7 +112,7 @@ pre_install() {
 		'/usr/src/build/postfix'
 	)
 
-	mkdir -vp ${sources[@]}
+	mkdir -vp ${sources[@]} 2>&1
 }
 
 post_install() {
@@ -138,7 +138,7 @@ post_install() {
 	/usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
 
     apt-get autoremove
-	apt-get clean
+	apt-get autoclean
 	rm -fr /var/lib/apt /usr/src/build
 }
 

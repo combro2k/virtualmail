@@ -108,7 +108,6 @@ pre_install() {
 		'/usr/src/build/greylist'
 		'/usr/src/build/milter-manager'
 		'/usr/src/build/yenma'
-		'/usr/src/build/opendmarc'
 		'/usr/src/build/pigeonhole'
 		'/usr/src/build/postfix'
 	)
@@ -138,6 +137,7 @@ post_install() {
 
 	/usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
 
+    apt-get purge build-essential
     apt-get autoremove
 	apt-get autoclean
 	rm -fr /var/lib/apt /usr/src/build
@@ -152,7 +152,6 @@ create_users() {
 	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password dovenull
 	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password dovecot
 	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password yenma
-	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password opendmarc
 }
 
 clamav() {
@@ -171,8 +170,7 @@ bitdefender() {
 }
 
 spamassassin() {
-	cpan -f install Mail::SPF::Query 2>&1
-	cpan -f install Mail::SpamAssassin 2>&1
+	echo 'notest force install Mail::SPF::Query Mail::SpamAssassin' | perl -MCPAN -e shell 2>&1
 	sa-update 2>&1
 }
 
@@ -266,7 +264,7 @@ dovecot   unix  -       n       n       -       -       pipe
   flags=DRhuuser=vmail:vmail argv=/usr/libexec/dovecot/deliver -f ${sender} -d ${recipient}
 EOF
 
-	cat <<EOF >> /etc/postfix/master.cf
+	cat <<'EOF' >> /etc/postfix/master.cf
 policy-spf  unix  -       n       n       -       -       spawn
     user=nobody argv=/usr/bin/policyd-spf /etc/postfix-policyd-spf-python/policyd-spf.conf
 EOF
@@ -434,7 +432,6 @@ build() {
 		'greylist'
 		'yenma'
 		'spf'
-		'opendmarc'
 		'mailman'
 		'install_ruby_rvm'
 	    'install_node_nvm'

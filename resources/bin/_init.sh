@@ -9,8 +9,6 @@ files=(
     '/etc/dovecot/dovecot-sql.conf.ext'
     '/etc/spamassassin/sql.cf'
     '/etc/postfix-policyd-spf-python/policyd-spf.conf'
-    '/etc/opendmarc/opendmarc.conf'
-    '/etc/opendkim/opendkim.conf'
     '/etc/yenma/yenma.conf'
 )
 
@@ -35,10 +33,9 @@ echo ${HOSTNAME} > /etc/mailname
 [ ! -d "/etc/dovecot/sieve" ] && mkdir -p /etc/dovecot/sieve/global && touch /etc/dovecot/sieve/default.sieve && chown -R vmail:vmail /etc/dovecot/sieve
 
 # Initialise freshclam
-/usr/bin/freshclam --quiet --config-file=/etc/clamav/freshclam.conf
+#/usr/bin/freshclam --quiet --config-file=/etc/clamav/freshclam.conf
 
 # Fix permissions etc
-[ "$(stat -c '%U:%G' /etc/opendkim)" != "opendkim:opendkim" ] && chown -R opendkim:opendkim /etc/opendkim
 ([ ! -G "/etc/amavis/*.*" ] || [ ! -G "/etc/amavis/*/*" ]) && chown root:root /etc/amavis -R
 [ "$(stat -c %U:%G /etc/postfix)" != "root:root" ] && chown root:root /etc/postfix -R
 [ "$(stat -c %a /etc/postfix)" -ne "640" ] && chmod 640 /etc/postfix -R

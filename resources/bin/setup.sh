@@ -111,9 +111,12 @@ pre_install() {
 		'/usr/src/build/milter-manager'
 		'/usr/src/build/pigeonhole'
 		'/usr/src/build/postfix'
+		'/usr/src/build/yenma'
 	)
 
-	mkdir -vp ${sources[@]} 2>&1
+	mkdir -p ${sources[@]} 2>&1
+
+	return 0
 }
 
 post_install() {
@@ -142,6 +145,8 @@ post_install() {
     apt-get autoremove
 	apt-get autoclean
 	rm -fr /var/lib/apt /usr/src/build
+
+	return 0
 }
 
 create_users() {
@@ -153,6 +158,8 @@ create_users() {
 	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password dovenull
 	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password dovecot
 	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password yenma
+
+return 0
 }
 
 clamav() {
@@ -164,10 +171,14 @@ clamav() {
 	make install 2>&1
 	mkdir -p /var/run/clamav /var/lib/clamav /var/log/clamav
 	chown -R clamav:clamav /var/run/clamav /var/lib/clamav /var/log/clamav
+
+	return 0
 }
 
 bitdefender() {
 	echo 'LicenseAccepted = True' >> /opt/BitDefender-scanner/etc/bdscan.conf
+
+	return 0
 }
 
 spamassassin() {
@@ -177,6 +188,8 @@ spamassassin() {
 	cpanm ${options} Mail::SpamAssassin::Plugin::Razor2 2>&1
 	cpanm ${options} Mail::SpamAssassin::Plugin::TxRep 2>&1
 	sa-update 2>&1
+
+	return 0
 }
 
 amavisd() {
@@ -199,13 +212,17 @@ amavisd() {
 	./configure --with-working-dir=/var/lib/amavis/tmp --prefix=/usr 2>&1
 	make 2>&1
 	make install 2>&1
+
+	return 0
 }
 
 postfix() {
 	cd /usr/src/build/postfix
 	curl --silent -L http://de.postfix.org/ftpmirror/official/postfix-${POSTFIX_VERSION}.tar.gz | tar zx --strip-components=1
-	make -f Makefile.init "CCARGS=-DHAS_MYSQL -DHAS_PCRE -I/usr/include/mysql $(pcre-config --cflags) -DUSE_SASL_AUTH -DUSE_TLS" "AUXLIBS_MYSQL=-L/usr/include/mysql -lmysqlclient -lz -lm $(pcre-config --libs) -lssl -lcrypto"
-	sh ./postfix-install -non-interactive install_root=/
+	make -f Makefile.init "CCARGS=-DHAS_MYSQL -DHAS_PCRE -I/usr/include/mysql $(pcre-config --cflags) -DUSE_SASL_AUTH -DUSE_TLS" "AUXLIBS_MYSQL=-L/usr/include/mysql -lmysqlclient -lz -lm $(pcre-config --libs) -lssl -lcrypto" 2>&1
+	sh ./postfix-install -non-interactive install_root=/ 2>&1
+
+	return 0
 }
 
 postfix_configure() {
@@ -295,6 +312,8 @@ EOF
 	do
 		postconf -P "${m}"
 	done
+
+	return 0
 }
 
 dovecot() {
@@ -302,8 +321,9 @@ dovecot() {
 	IFS='.' read -ra PARSE <<< "${DOVECOT_VERSION}"
 	DOVECOT_MAIN=$(echo "${PARSE[0]}.${PARSE[1]}")
 	curl --silent -L http://dovecot.org/releases/${DOVECOT_MAIN}/dovecot-${DOVECOT_VERSION}.tar.gz | tar zx --strip-components=1
-	./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --with-mysql --with-ssl --without-shared-libs
-	make && make install
+	./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --with-mysql --with-ssl --without-shared-libs 2>&1
+	make 2>&1
+	make install 2>&1 
 
 	echo '# Dovecot Sieve / ManageSieve'
 	cd /usr/src/build/pigeonhole
@@ -311,6 +331,8 @@ dovecot() {
 	./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var 2>&1
 	make 2>&1
 	make install 2>&1
+
+	return 0
 }
 
 greylist() {
@@ -333,6 +355,8 @@ greylist() {
 	make install 2>&1
 	mkdir -p /var/spool/postfix/milter-greylist /var/spool/postfix/greylist
 	chown -R postfix:postfix /var/spool/postfix/milter-greylist /var/spool/postfix/greylist
+
+	return 0
 }
 
 yenma() {
@@ -341,6 +365,8 @@ yenma() {
 	./configure --prefix=/usr --sysconfdir=/etc/yenma --localstatedir=/var 2>&1
 	make 2>&1
 	make install 2>&1
+
+	return 0
 }
 
 spf() {
@@ -348,10 +374,12 @@ spf() {
 	pip install authres pyspf https://ipaddr-py.googlecode.com/files/ipaddr-2.1.5-py3k.tar.gz py3dns --pre 2>&1
 	pip install https://launchpad.net/pypolicyd-spf/${PYPOLICYD_SPF_MAIN}/${PYPOLICYD_SPF_VERSION}/+download/pypolicyd-spf-${PYPOLICYD_SPF_VERSION}.tar.gz 2>&1
 	mv /usr/local/bin/policyd-spf /usr/bin/policyd-spf
+
+	return 0
 }
 
 mailman() {
-	npm install -g less
+	npm install -g less 2>&1
 	mkdir -p /etc/mailman.d /var/log/mailman
 	virtualenv -p python3.4 /opt/mailman 2>&1
 	/opt/mailman/bin/pip install -I --pre -U mailman mailman-hyperkitty 2>&1
@@ -361,18 +389,20 @@ mailman() {
 	/opt/postorius/bin/python -c 'import pip, subprocess; [subprocess.call("/opt/postorius/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]' 2>&1
 	ln -s /usr/bin/nodejs /usr/bin/node
 	rm /etc/nginx/conf.d/default.conf
+
+	return 0
 }
 
 install_ruby_rvm()
 {
-    gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3 2>&1 > /dev/null
+	gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3 2>&1 > /dev/null
 	curl --silent -L https://get.rvm.io | bash
 
 	source /etc/profile.d/rvm.sh
 
-    rvm install 2.1.7
+	rvm install 2.1.7
 	rvm use 2.1.7
-    rvm alias create default 2.1.7
+	rvm alias create default 2.1.7
 	echo 'gem: --no-document' | tee ${APP_HOME}/.gemrc
 	gem install bundler
 
@@ -383,7 +413,7 @@ install_node_nvm(){
     NVM_DIR="${HOME}/.nvm"
     PATH="${PATH}:${HOME}/npm/bin"
     NODE_PATH="${NODE_PATH}:${HOME}/npm/lib/node_modules"
-    curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+    curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash 2>&1
     # Add variables to the default nvm loader
     echo '' >> $NVM_DIR/nvm.sh
     echo '# Set default variables' >> $NVM_DIR/nvm.sh
@@ -392,9 +422,9 @@ install_node_nvm(){
 
     source "${NVM_DIR}/nvm.sh"
 
-    nvm install unstable
-    nvm alias default unstable
-    nvm use unstable
+    nvm install stable 2>&1
+    nvm alias default stable 2>&1
+    nvm use stable 2>&1
 
     return 0
 }

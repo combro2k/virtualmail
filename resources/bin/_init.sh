@@ -11,6 +11,7 @@ files=(
     '/etc/postfix-policyd-spf-python/policyd-spf.conf'
     '/etc/opendmarc/opendmarc.conf'
     '/etc/opendkim/opendkim.conf'
+    '/etc/yenma/yenma.conf'
 )
 
 echo "Initializing the container..."

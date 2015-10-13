@@ -32,6 +32,7 @@ export packages=(
 	'libdbd-mysql-perl'
 	'libdbi-perl'
 	'libdist-zilla-localetextdomain-perl'
+	'libldns-dev'
 	'libencode-detect-perl'
 	'libfcgi-perl'
 	'libfile-copy-recursive-perl'
@@ -106,7 +107,7 @@ pre_install() {
 		'/usr/src/build/dovecot'
 		'/usr/src/build/greylist'
 		'/usr/src/build/milter-manager'
-		'/usr/src/build/opendkim'
+		'/usr/src/build/yenma'
 		'/usr/src/build/opendmarc'
 		'/usr/src/build/pigeonhole'
 		'/usr/src/build/postfix'
@@ -125,7 +126,7 @@ post_install() {
 		'/etc/mailman'
 		'/etc/milter-manager'
 		'/etc/nginx'
-		'/etc/opendkim'
+		'/etc/yenma'
 		'/etc/postfix'
 		'/etc/postfix-policyd-spf-python'
 		'/etc/spamassassin'
@@ -150,7 +151,7 @@ create_users() {
 	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password postdrop
 	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password dovenull
 	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password dovecot
-	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password opendkim
+	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password yenma
 	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password opendmarc
 }
 
@@ -260,9 +261,9 @@ postfix_configure() {
 	sed -i 's/^#submission inet n       -       n       -       -       smtpd/submission inet n       -       n       -       -       smtpd/g' /etc/postfix/master.cf
 	sed -i 's/^#smtps     inet  n       -       n       -       -       smtpd/smtps     inet  n       -       n       -       -       smtpd/g' /etc/postfix/master.cf
 
-	cat <<EOF >> /etc/postfix/master.cf
+	cat <<'EOF' >> /etc/postfix/master.cf
 dovecot   unix  -       n       n       -       -       pipe
-  flags=DRhuuser=vmail:vmail argv=/usr/libexec/dovecot/deliver -f \${sender} -d \${recipient}
+  flags=DRhuuser=vmail:vmail argv=/usr/libexec/dovecot/deliver -f ${sender} -d ${recipient}
 EOF
 
 	cat <<EOF >> /etc/postfix/master.cf
@@ -298,13 +299,13 @@ dovecot() {
 	IFS='.' read -ra PARSE <<< "${DOVECOT_VERSION}"
 	DOVECOT_MAIN=$(echo "${PARSE[0]}.${PARSE[1]}")
 	curl --silent -L http://dovecot.org/releases/${DOVECOT_MAIN}/dovecot-${DOVECOT_VERSION}.tar.gz | tar zx --strip-components=1
-	./configure --prefix=/usr --sysconfdir=/etc --with-mysql --with-ssl --without-shared-libs
+	./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --with-mysql --with-ssl --without-shared-libs
 	make && make install
 
 	echo '# Dovecot Sieve / ManageSieve'
 	cd /usr/src/build/pigeonhole
 	curl --silent -L http://pigeonhole.dovecot.org/releases/${DOVECOT_MAIN}/dovecot-${DOVECOT_MAIN}-pigeonhole-${DOVECOT_PIGEONHOLE}.tar.gz | tar zx --strip-components=1
-	./configure --prefix=/usr --sysconfdir=/etc 2>&1
+	./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var 2>&1
 	make 2>&1
 	make install 2>&1
 }
@@ -323,17 +324,18 @@ greylist() {
 		--with-libspf2 \
 		--enable-spamassassin \
 		--enable-p0f \
+		--localstatedir=/var \
 		--with-delay=600 2>&1
 	make 2>&1
 	make install 2>&1
-	mkdir -p /var/spool/postfix/{milter-greylist,greylist}
-	chown -R postfix:postfix /var/spool/postfix/{milter-greylist,greylist}
+	mkdir -p /var/spool/postfix/milter-greylist /var/spool/postfix/greylist
+	chown -R postfix:postfix /var/spool/postfix/milter-greylist /var/spool/postfix/greylist
 }
 
-opendkim() {
-	cd /usr/src/build/opendkim
-	curl --silent -L http://netcologne.dl.sourceforge.net/project/opendkim/opendkim-${OPENDKIM_VERSION}.tar.gz | tar zx --strip-components=1
-	./configure --prefix=/usr 2>&1
+yenma() {
+	cd /usr/src/build/yenma
+	curl --silent -L https://github.com/iij/yenma/archive/master.tar.gz | tar zx -C /usr/src/build/yenma --strip-components=1
+	./configure --prefix=/usr --sysconfdir=/etc/yenma --localstatedir=/var 2>&1
 	make 2>&1
 	make install 2>&1
 }
@@ -343,16 +345,6 @@ spf() {
 	pip install authres pyspf https://ipaddr-py.googlecode.com/files/ipaddr-2.1.5-py3k.tar.gz py3dns --pre 2>&1
 	pip install https://launchpad.net/pypolicyd-spf/${PYPOLICYD_SPF_MAIN}/${PYPOLICYD_SPF_VERSION}/+download/pypolicyd-spf-${PYPOLICYD_SPF_VERSION}.tar.gz 2>&1
 	mv /usr/local/bin/policyd-spf /usr/bin/policyd-spf
-}
-
-opendmarc() {
-	cd /usr/src/build/opendmarc
-	curl --silent -L http://netcologne.dl.sourceforge.net/project/opendmarc/opendmarc-${OPENDMARC_VERSION}.tar.gz | tar zx --strip-components=1
-	./configure --prefix=/usr --with-spf --with-sql-backend 2>&1
-	make 2>&1
-	make install 2>&1
-	mkdir -p /var/run/opendmarc
-	chown -R opendmarc:opendmarc /var/run/opendmarc
 }
 
 mailman() {
@@ -440,7 +432,7 @@ build() {
 		'postfix_configure'
 		'dovecot'
 		'greylist'
-		'opendkim'
+		'yenma'
 		'spf'
 		'opendmarc'
 		'mailman'

@@ -2,6 +2,7 @@
 
 trap '{ echo -e "error ${?}\nthe command executing at the time of the error was\n${BASH_COMMAND}\non line ${BASH_LINENO[0]}" && tail -n 10 ${INSTALL_LOG} && exit $? }' ERR
 
+export PERL_MM_USE_DEFAULT=1
 export DEBIAN_FRONTEND=noninteractive
 export packages=(
 	'arj'
@@ -12,6 +13,7 @@ export packages=(
 	'cpio'
 	'cron'
 	'curl'
+	'cpanminus'
 	'fcgiwrap'
 	'git'
 	'flex'
@@ -107,7 +109,6 @@ pre_install() {
 		'/usr/src/build/dovecot'
 		'/usr/src/build/greylist'
 		'/usr/src/build/milter-manager'
-		'/usr/src/build/yenma'
 		'/usr/src/build/pigeonhole'
 		'/usr/src/build/postfix'
 	)
@@ -170,7 +171,11 @@ bitdefender() {
 }
 
 spamassassin() {
-	echo 'notest force install Mail::SPF::Query Mail::SpamAssassin' | perl -MCPAN -e shell 2>&1
+	options='--configure-args="PREFIX=/usr" --dev --no-interactive -nqfi'
+	cpanm ${options} Mail::SPF::Query 2>&1
+	cpanm ${options} Mail::SpamAssassin 2>&1
+	cpanm ${options} Mail::SpamAssassin::Plugin::Razor2 2>&1
+	cpanm ${options} Mail::SpamAssassin::Plugin::TxRep 2>&1
 	sa-update 2>&1
 }
 
@@ -434,7 +439,7 @@ build() {
 		'spf'
 		'mailman'
 		'install_ruby_rvm'
-	    'install_node_nvm'
+	    	'install_node_nvm'
 		'milter_manager'
 	)
 

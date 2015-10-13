@@ -157,7 +157,7 @@ create_users() {
 clamav() {
 	cd /usr/src/build/clamav
 	adduser --quiet clamav amavis
-	curl --silent -L http://netcologne.dl.sourceforge.net/project/clamav/clamav/${CLAMAV_VERSION}/clamav-${CLAMAV_VERSION}.tar.gz | tar zx --strip-components=1
+	curl --silent -L http://www.clamav.net/downloads/${CLAMAV_MAIN}/clamav-${CLAMAV_VERSION}.tar.gz | tar zx --strip-components=1
 	./configure --prefix=/usr --sysconfdir=/etc --with-working-dir=/var/lib/amavis 2>&1
 	make 2>&1
 	make install 2>&1

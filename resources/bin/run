@@ -6,7 +6,6 @@ test -z "${MYSQL_PORT_3306_TCP_PORT}" && echo "Can not run without MySQL link!" 
 test -z "${POSTFIX_MYSQL_PASSWORD}" && echo "Can not run without Postfix password set!" && exit 1
 
 # IPV6 on $IP6DEV default eth1 (Please run with --cap-add=NET_ADMIN -e "IPV6ADDR=..." -e "IPV6GW=..." -e "IP6DEV=...")
-test - z "$IP6DEV" && IP6DEV=eth1
 test ! -z "$IPV6ADDR" && ip -6 addr add "$IPV6ADDR" dev "$IP6DEV" && sleep 2s
 test ! -z "$IPV6GW" && ip -6 route add default via "$IPV6GW" dev "$IP6DEV"
 

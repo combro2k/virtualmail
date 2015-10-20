@@ -31,7 +31,7 @@ MANAGERS = ADMINS
 ALLOWED_HOSTS = ['*']
 # And for BrowserID too, see
 # http://django-browserid.rtfd.org/page/user/settings.html#django.conf.settings.BROWSERID_AUDIENCES
-BROWSERID_AUDIENCES = [ "http://localhost", "http://localhost:8000" ]
+#BROWSERID_AUDIENCES = [ "http://localhost", "http://localhost:8000" ]
 
 # Mailman API credentials
 MAILMAN_REST_SERVER = MAILMAN_API_URL = 'http://localhost:8001'
@@ -58,7 +58,7 @@ INSTALLED_APPS = (
     'crispy_forms',
     'paintstore',
     'compressor',
-    'django_browserid',
+#    'django_browserid',
     'haystack',
     'django_extensions',
     'postorius',
@@ -157,8 +157,8 @@ LOGIN_URL          = '/archives/accounts/login/'
 LOGIN_REDIRECT_URL = '/archives/'
 LOGIN_ERROR_URL    = '/archives/accounts/login/'
 
-BROWSERID_USERNAME_ALGO = lambda email: email # Use the email as identifier
-BROWSERID_VERIFY_CLASS = "django_browserid.views.Verify"
+#BROWSERID_USERNAME_ALGO = lambda email: email # Use the email as identifier
+#BROWSERID_VERIFY_CLASS = "django_browserid.views.Verify"
 
 AUTHENTICATION_BACKENDS = (
         #'social.backends.open_id.OpenIdAuth',
@@ -167,7 +167,7 @@ AUTHENTICATION_BACKENDS = (
         #'social.backends.google.GoogleOAuth2',
         #'social.backends.twitter.TwitterOAuth',
         'social.backends.yahoo.YahooOpenId',
-        'django_browserid.auth.BrowserIDBackend',
+        #'django_browserid.auth.BrowserIDBackend',
         'django.contrib.auth.backends.ModelBackend',
 )
 

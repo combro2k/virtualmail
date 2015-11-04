@@ -262,7 +262,7 @@ postfix_configure() {
 
 	cat <<EOF >> /etc/postfix/master.cf
 dovecot   unix  -       n       n       -       -       pipe
-  flags=DRhuuser=vmail:vmail argv=/usr/libexec/dovecot/deliver -f \${sender} -d \${recipient}
+  flags=DRhu user=vmail:vmail argv=/usr/libexec/dovecot/deliver -f \${sender} -d \${recipient}
 EOF
 
 	cat <<EOF >> /etc/postfix/master.cf

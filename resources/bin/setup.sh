@@ -268,6 +268,9 @@ postfix_configure()
 		'milter_protocol = 6'
 		'milter_mail_macros = {auth_author} {auth_type} {auth_authen}'
 		'smtpd_milters = inet:[127.0.0.1]:10025'
+        'lmtp_tls_mandatory_protocols = !SSLv2,!SSLv3'
+        'lmtp_tls_protocols = !SSLv2,!SSLv3'
+        'smtpd_tls_mandatory_protocols = !SSLv2,!SSLv3'
 	)
 
 	for m in "${main[@]}"

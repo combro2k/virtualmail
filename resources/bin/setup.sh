@@ -11,6 +11,7 @@ export packages=(
 	'cabextract'
 	'cpio'
 	'cron'
+    'cpanminus'
 	'curl'
 	'fcgiwrap'
 	'git'
@@ -101,7 +102,8 @@ export AMAVISD_MILTER=1.6.1
 export GREYLIST_VERSION=4.5.14
 export OPENDMARC_VERSION=1.3.1
 
-pre_install() {
+pre_install()
+{
 	apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 2>&1 > /dev/null
 	apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A373FB480EC4FE05 2>&1 > /dev/null
 
@@ -131,36 +133,8 @@ pre_install() {
     return 0
 }
 
-post_install() {
-	configs=(
-		'/etc/amavis'
-		'/etc/clamav'
-		'/etc/cron.d'
-		'/etc/dovecot'
-		'/etc/greylist'
-		'/etc/mailman'
-		'/etc/milter-manager'
-		'/etc/nginx'
-		'/etc/opendkim'
-		'/etc/postfix'
-		'/etc/postfix-policyd-spf-python'
-		'/etc/spamassassin'
-		'/etc/supervisor'
-		'/etc/mailname'
-	)
-
-	tar --numeric-owner --create --auto-compress ${configs[@]} | gzip -9 - > /root/config.tar.gz
-
-	/usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
-
-    apt-get autoremove
-	apt-get autoclean
-	rm -fr /var/lib/apt /usr/src/build
-
-    return 0
-}
-
-create_users() {
+create_users()
+{
 	adduser --quiet --system --group --uid 1000 --home /var/vmail --shell /usr/sbin/nologin --disabled-password vmail
 	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password clamav
 	adduser --quiet --system --group --no-create-home --shell /usr/sbin/nologin --disabled-password amavis
@@ -174,7 +148,8 @@ create_users() {
     return 0
 }
 
-clamav() {
+clamav()
+{
 	cd /usr/src/build/clamav
 	adduser --quiet clamav amavis
 	curl --silent -L http://www.clamav.net/downloads/${CLAMAV_MAIN}/clamav-${CLAMAV_VERSION}.tar.gz | tar zx --strip-components=1
@@ -187,21 +162,24 @@ clamav() {
     return 0
 }
 
-bitdefender() {
+bitdefender()
+{
 	echo 'LicenseAccepted = True' >> /opt/BitDefender-scanner/etc/bdscan.conf
 
     return 0
 }
 
-spamassassin() {
-	cpan -f install Mail::SPF::Query 2>&1
-	cpan -f install Mail::SpamAssassin 2>&1
+spamassassin()
+{
+	cpanm -fnq install Mail::SPF::Query Mail::SpamAssassin 2>&1
+
 	sa-update 2>&1
 
     return 0
 }
 
-amavisd() {
+amavisd()
+{
 	cd /usr/src/build/amavisd-new
 	adduser --quiet amavis clamav
 	mkdir -p /var/run/amavis /var/lib/amavis/tmp /var/lib/amavis/db /var/lib/amavis/virusmails
@@ -226,7 +204,8 @@ amavisd() {
     return 0
 }
 
-postfix() {
+postfix()
+{
 	cd /usr/src/build/postfix
 
 	curl --silent -L http://de.postfix.org/ftpmirror/official/postfix-${POSTFIX_VERSION}.tar.gz | tar zx --strip-components=1 2>&1
@@ -240,7 +219,8 @@ postfix() {
     return 0
 }
 
-postfix_configure() {
+postfix_configure()
+{
 	main=(
 		'smtpd_tls_cert_file = /etc/ssl/certs/ssl-cert-snakeoil.pem'
 		'smtpd_tls_key_file = /etc/ssl/private/ssl-cert-snakeoil.key'
@@ -331,7 +311,8 @@ EOF
     return 0
 }
 
-dovecot() {
+dovecot()
+{
 	cd /usr/src/build/dovecot
 	IFS='.' read -ra PARSE <<< "${DOVECOT_VERSION}"
 	DOVECOT_MAIN=$(echo "${PARSE[0]}.${PARSE[1]}")
@@ -353,7 +334,8 @@ dovecot() {
     return 0
 }
 
-greylist() {
+greylist()
+{
 	cd /usr/src/build/greylist
 	curl --silent -L ftp://ftp.espci.fr/pub/milter-greylist/milter-greylist-${GREYLIST_VERSION}.tgz | tar zx --strip-components=1 -C /usr/src/build/greylist
 
@@ -378,7 +360,8 @@ greylist() {
     return 0
 }
 
-opendkim() {
+opendkim()
+{
 	cd /usr/src/build/opendkim
 
 	curl --silent -L \
@@ -391,7 +374,8 @@ opendkim() {
     return 0
 }
 
-spf() {
+spf()
+{
 	mkdir -p /etc/postfix-policyd-spf-python
 
 	pip install \
@@ -405,7 +389,8 @@ spf() {
     return 0
 }
 
-opendmarc() {
+opendmarc()
+{
 	cd /usr/src/build/opendmarc
 	curl --silent -L \
         http://netcologne.dl.sourceforge.net/project/opendmarc/opendmarc-${OPENDMARC_VERSION}.tar.gz | tar zx --strip-components=1 2>&1
@@ -420,7 +405,8 @@ opendmarc() {
     return 0
 }
 
-mailman() {
+mailman()
+
 	npm install -g less 2>&1
 
 	mkdir -p /etc/mailman.d /var/log/mailman
@@ -480,7 +466,8 @@ install_node_nvm(){
     return 0
 }
 
-milter_manager() {
+milter_manager()
+{
 	cd /usr/src/build/milter-manager
 	curl --silent -L \
         https://github.com/milter-manager/milter-manager/archive/master.tar.gz | tar zx --strip-components=1 2>&1
@@ -499,6 +486,36 @@ load_rvm()
     then
         source /etc/profile.d/rvm.sh
     fi
+}
+
+post_install()
+{
+    configs=(
+        '/etc/amavis'
+        '/etc/clamav'
+        '/etc/cron.d'
+        '/etc/dovecot'
+        '/etc/greylist'
+        '/etc/mailman'
+        '/etc/milter-manager'
+        '/etc/nginx'
+        '/etc/opendkim'
+        '/etc/postfix'
+        '/etc/postfix-policyd-spf-python'
+        '/etc/spamassassin'
+        '/etc/supervisor'
+        '/etc/mailname'
+    )
+
+    tar --numeric-owner --create --auto-compress ${configs[@]} | gzip -9 - > /root/config.tar.gz
+
+    /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
+
+    apt-get autoremove
+    apt-get autoclean
+    rm -fr /var/lib/apt /usr/src/build
+
+    return 0
 }
 
 build() {

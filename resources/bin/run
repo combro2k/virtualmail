@@ -1,15 +1,36 @@
 #!/bin/bash
+
 set -e
 
 test -z "${MYSQL_PORT_3306_TCP_ADDR}" && echo "Can not run without MySQL link!" && exit 1
 test -z "${MYSQL_PORT_3306_TCP_PORT}" && echo "Can not run without MySQL link!" && exit 1
-test -z "${POSTFIX_MYSQL_PASSWORD}" && echo "Can not run without Postfix password set!" && exit 1
 
 # IPV6 on $IP6DEV default eth1 (Please run with --cap-add=NET_ADMIN -e "IPV6ADDR=..." -e "IPV6GW=..." -e "IP6DEV=...")
-test ! -z "$IPV6ADDR" && ip -6 addr add "$IPV6ADDR" dev "$IP6DEV" && sleep 2s
-test ! -z "$IPV6GW" && ip -6 route add default via "$IPV6GW" dev "$IP6DEV"
+test ! -z "${IPV6ADDR}" && ip -6 addr add "${IPV6ADDR}" dev "${IP6DEV}" && sleep 2s
+test ! -z "${IPV6GW}" && ip -6 route add default via "${IPV6GW}" dev "${IP6DEV}"
+
+for file in $(cd /etc/skeletons && find . -type f -printf '%P\n'); do
+    if [ -f /etc/${file} ]; then
+        mv -f /etc/${file} /etc/${file}.1
+    fi
+
+    cp -f /etc/skeletons/${file} /etc/${file}
+
+    sed -i "s/__REPLACE_DATABASE_HOST__/${MYSQL_PORT_3306_TCP_ADDR}/g" /etc/${file}
+    sed -i "s/__REPLACE_DATABASE_PORT__/${MYSQL_PORT_3306_TCP_PORT}/g" /etc/${file}
+    sed -i "s/__REPLACE_DATABASE_NAME__/${POSTFIX_MYSQL_DATABASE:-postfix}/g" /etc/${file}
+    sed -i "s/__REPLACE_DATABASE_USER__/${POSTFIX_MYSQL_USER:-postfix}/g" /etc/${file}
+    sed -i "s/__REPLACE_DATABASE_PASSWORD__/${POSTFIX_MYSQL_PASSWORD:-postfix}/g" /etc/${file}
+    sed -i "s/mail.example.org/${HOSTNAME}/g" /etc/${file}
+done
 
 test ! -f "/root/.init" && . /usr/local/bin/_init.sh
-test ! -f "/root/.mailman_init" && test ! -z "{MAILINGLIST}" && . /usr/local/bin/_mailman_init.sh
+test ! -f "/root/.mailman_init" && test ! -z "${MAILINGLIST}" && . /usr/local/bin/_mailman_init.sh
+
+# Fix permissions etc
+find /etc/opendkim ! \( -user opendkim -group opendkim \) -exec chown opendkim:opendkim "{}" +
+find /etc/amavis ! \( -user root -group root \) -exec chown root:root "{}" +
+find /etc/postfix ! \( -user root -group root \) -exec chown root:root "{}" +
+find /etc/postfix ! \( -perm 0640 -o -perm 2640 \) -exec chmod 0640 "{}" +
 
 /usr/bin/supervisord -c /etc/supervisor/supervisord.conf

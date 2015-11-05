@@ -7,20 +7,6 @@ ENV HOME=/root \
     INSTALL_LOG=/var/log/build.log \
     AMAVISD_DB_HOME=/var/lib/amavis/db
 
-# Software versions
-ENV POSTFIX_VERSION=3.0.3 \
-    DOVECOT_VERSION=2.2.19 \
-    DOVECOT_PIGEONHOLE=0.4.9 \
-    OPENDKIM_VERSION=2.10.3 \
-    PYPOLICYD_SPF_MAIN=1.3 \
-    PYPOLICYD_SPF_VERSION=1.3.2 \
-    CLAMAV_VERSION=0.99-rc1 \
-    CLAMAV_MAIN=release_candidate \
-    AMAVISD_NEW_VERSION=2.10.1 \
-    AMAVISD_MILTER=1.6.1 \
-    GREYLIST_VERSION=4.5.14 \
-    OPENDMARC_VERSION=1.3.1
-
 # Add resources
 ADD resources/bin/ /usr/local/bin/
 
@@ -31,11 +17,11 @@ ADD resources/etc/ /etc/
 ADD resources/opt/ /opt/
 
 # Run the last bits and clean up
-RUN /bin/bash -l -c '/usr/local/bin/setup.sh post_install' | tee -a ${INSTALL_LOG} > /dev/null 2>&1
+RUN /bin/bash -l -c '/usr/local/bin/setup.sh post_install | tee -a ${INSTALL_LOG} > /dev/null 2>&1'
 
 EXPOSE 25 80 110 143 465 587 993 995 4190
 
-VOLUME ["/var/vmail", "/etc/dovecot", "/etc/postfix", "/etc/amavis" , "/etc/opendkim", "/etc/opendmarc", "/var/mailman", "/etc/mailman"]
+VOLUME ["/etc/skeletons"]
 
 CMD ["/usr/local/bin/run"]
 

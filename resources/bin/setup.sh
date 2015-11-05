@@ -70,7 +70,6 @@ export packages=(
 	'net-tools'
 	'nginx'
 	'nomarch'
-	'npm'
 	'pax'
 	'pwgen'
 	'python2.7-dev'
@@ -87,6 +86,10 @@ export packages=(
 	'xz-utils'
 	'zip'
 )
+
+export NVM_DIR="/opt/nvm"
+export PATH="${PATH}:${NVM_DIR}/npm/bin"
+export NODE_PATH="${NODE_PATH}:${NVM_DIR}/npm/lib/node_modules"
 
 # Versions
 export POSTFIX_VERSION=3.0.3
@@ -406,6 +409,8 @@ opendmarc()
 }
 
 mailman()
+{
+    eval load_nvm
 
 	npm install -g less 2>&1
 
@@ -446,28 +451,30 @@ install_ruby_rvm()
 	return 0
 }
 
-install_node_nvm(){
-    NVM_DIR="${HOME}/.nvm"
-    PATH="${PATH}:${HOME}/npm/bin"
-    NODE_PATH="${NODE_PATH}:${HOME}/npm/lib/node_modules"
-    curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+install_node_nvm()
+{
+    curl --location --silent -S \
+        https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash 2>&1 || return 1
+
     # Add variables to the default nvm loader
-    echo '' >> $NVM_DIR/nvm.sh
-    echo '# Set default variables' >> $NVM_DIR/nvm.sh
-    echo "export PATH=\${PATH}:\${HOME}/npm/bin" >> $NVM_DIR/nvm.sh
-    echo "export NODE_PATH=\${NODE_PATH}:\${HOME}/npm/lib/node_modules" >> $NVM_DIR/nvm.sh
+    echo '' >> ${NVM_DIR}/nvm.sh || return 1
+    echo '# Set default variables' >> ${NVM_DIR}/nvm.sh || return 1
+    echo "export PATH=\${PATH}:\${NVM_DIR}/npm/bin" >> ${NVM_DIR}/nvm.sh || return 1
+    echo "export NODE_PATH=\${NODE_PATH}:\${NVM_DIR}/npm/lib/node_modules" >> ${NVM_DIR}/nvm.sh || return 1
 
-    source "${NVM_DIR}/nvm.sh"
+    eval load_nvm 2>&1 || return 1
 
-    nvm install unstable
-    nvm alias default unstable
-    nvm use unstable
+    nvm install stable 2>&1 || return 1
+    nvm alias default stable 2>&1 || return 1
+    nvm use stable 2>&1 || return 1
 
     return 0
 }
 
 milter_manager()
 {
+    eval load_rvm
+
 	cd /usr/src/build/milter-manager
 	curl --silent -L \
         https://github.com/milter-manager/milter-manager/archive/master.tar.gz | tar zx --strip-components=1 2>&1
@@ -486,6 +493,18 @@ load_rvm()
     then
         source /etc/profile.d/rvm.sh
     fi
+}
+
+load_nvm()
+{
+    if [ -f ${NVM_DIR}/nvm.sh ]; then
+        source "${NVM_DIR}/nvm.sh" 2>&1 || return 1
+    else
+        echo "Could not load NVM"
+        return 1
+    fi
+
+    return 0
 }
 
 post_install()
@@ -527,6 +546,8 @@ build() {
 	tasks=(
 		'create_users'
 		'pre_install'
+        'install_ruby_rvm'
+        'install_node_nvm'
 		'clamav'
 		'bitdefender'
 		'spamassassin'
@@ -539,8 +560,6 @@ build() {
 		'spf'
 		'opendmarc'
 		'mailman'
-		'install_ruby_rvm'
-	    'install_node_nvm'
 		'milter_manager'
 	)
 
@@ -562,11 +581,6 @@ then
 
 	exit 1
 else
-    if [ -z "${rvm_prefix}" ]
-    then
-        eval load_rvm
-    fi
-
 	for task in ${@}
 	do
 		echo "Running ${task}..."

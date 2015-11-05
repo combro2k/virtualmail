@@ -423,7 +423,7 @@ mailman()
 
 	virtualenv -p python2.7 /opt/postorius 2>&1
 	/opt/postorius/bin/pip install -I -U \
-        django==1.8 django-gravatar flup postorius Whoosh mock \
+        django==1.8.6 django-gravatar flup postorius Whoosh mock \
         beautifulsoup4 hyperkitty python-openid python-social-auth \
         django-browserid uwsgi django-uwsgi gunicorn==19.1 gevent django-xforwardedfor-middleware 2>&1
 	/opt/postorius/bin/python -c 'import pip, subprocess; [subprocess.call("/opt/postorius/bin/pip install --pre -U " + d.project_name, shell=1) for d in pip.get_installed_distributions()]' 2>&1

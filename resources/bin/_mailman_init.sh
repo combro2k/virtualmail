@@ -3,8 +3,8 @@
 set -e
 
 files=(
-'/etc/nginx/conf.d/nginx-postorius.conf'
-'/opt/postorius_standalone/hyperkitty.cfg'
+    '/etc/nginx/conf.d/nginx-postorius.conf'
+    '/opt/postorius_standalone/hyperkitty.cfg'
 )
 
 echo "Initializing the mailman in the container..."
@@ -12,11 +12,14 @@ echo "Initializing the mailman in the container..."
 if [ ! -d /var/run/mailman ]; then
     mkdir -p /var/run/mailman
 fi
-if ! ls -A /etc/mailman > /dev/null 2 >&1; then
+if ! ls -A /etc/mailman > /dev/null 2>&1; then
     tar xzf "/root/config.tar.gz" -C / etc/mailman
 fi
-if ! ls -A /var/mailman > /dev/null 2 >&1; then
-    /opt/mailman/bin/mailman --config /etc/mailman/mailman.cfg help > /dev/null 2 > &1
+if [ ! -d /var/mailman ]; then
+    mkdir -p /var/mailman
+fi
+if ! ls -A /var/mailman > /dev/null 2>&1; then
+    /opt/mailman/bin/mailman --config /etc/mailman/mailman.cfg help > /dev/null 2>&1
 fi
 
 if [ -f /var/mailman/data/postorius_password ]; then

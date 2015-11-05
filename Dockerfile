@@ -21,7 +21,7 @@ RUN /bin/bash -l -c '/usr/local/bin/setup.sh post_install | tee -a ${INSTALL_LOG
 
 EXPOSE 25 80 110 143 465 587 993 995 4190
 
-VOLUME ["/etc/skeletons"]
+VOLUME ["/etc/skeletons", "/var/vmail", "/var/mailman"]
 
 CMD ["/usr/local/bin/run"]
 

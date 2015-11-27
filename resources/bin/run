@@ -28,9 +28,11 @@ test ! -f "/root/.init" && . /usr/local/bin/_init.sh
 test ! -f "/root/.mailman_init" && test ! -z "${MAILINGLIST}" && . /usr/local/bin/_mailman_init.sh
 
 # Fix permissions etc
-find /etc/opendkim ! \( -user opendkim -group opendkim \) -exec chown opendkim:opendkim "{}" +
-find /etc/amavis ! \( -user root -group root \) -exec chown root:root "{}" +
-find /etc/postfix ! \( -user root -group root \) -exec chown root:root "{}" +
-find /etc/postfix ! \( -perm 0640 -o -perm 2640 \) -exec chmod 0640 "{}" +
+find /etc/opendkim -not -user opendkim -not -group opendkim -exec chown opendkim:opendkim "{}" +
+find /etc/amavis -not -user root -not -group root -exec chown root:root "{}" +
+find /etc/postfix -not -user root -not -group root -exec chown root:root "{}" +
+find /etc/postfix -not -perm 0640 -not -perm 2640 -exec chmod 0640 "{}" +
+find /etc/dovecot -not -user root -not -group root -not -wholename '/etc/dovecot/sieve*' -exec chown root:root "{}" +
+find /etc/dovecot/sieve -not -user vmail -not -group vmail -exec chown vmail:vmail "{}" +
 
 /usr/bin/supervisord -c /etc/supervisor/supervisord.conf

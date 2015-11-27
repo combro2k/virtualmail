@@ -25,7 +25,7 @@ fi
 
 if [ ! -d /var/run/dovecot ]; then
     mkdir -p /var/run/dovecot/
-    chown dovecot:dovecot /var/run/clamav
+    chown dovecot:dovecot /var/run/dovecot
 fi
 
 if [ ! -d /etc/dovecot/sieve ]; then

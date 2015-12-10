@@ -93,16 +93,16 @@ export NODE_PATH="${NODE_PATH}:${NVM_DIR}/npm/lib/node_modules"
 
 # Versions
 export POSTFIX_VERSION=3.0.3
-export DOVECOT_VERSION=2.2.19
+export DOVECOT_VERSION=2.2.20
 export DOVECOT_PIGEONHOLE=0.4.9
 export OPENDKIM_VERSION=2.10.3
 export PYPOLICYD_SPF_MAIN=1.3
 export PYPOLICYD_SPF_VERSION=1.3.2
-export CLAMAV_VERSION=0.99-rc2
-export CLAMAV_MAIN=release_candidate
+export CLAMAV_VERSION=0.99
+export CLAMAV_MAIN=production
 export AMAVISD_NEW_VERSION=2.10.1
 export AMAVISD_MILTER=1.6.1
-export GREYLIST_VERSION=4.5.14
+export GREYLIST_VERSION=4.5.16
 export OPENDMARC_VERSION=1.3.1
 
 pre_install()

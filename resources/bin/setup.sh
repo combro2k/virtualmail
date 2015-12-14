@@ -533,6 +533,7 @@ post_install()
 
     /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
 
+	apt-get purge exim4 -y
     apt-get autoremove
     apt-get autoclean
     rm -fr /var/lib/apt /usr/src/build

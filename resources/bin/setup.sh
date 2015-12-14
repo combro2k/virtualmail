@@ -115,6 +115,7 @@ pre_install()
 
 	apt-get update -q 2>&1
 	apt-get install -yq ${packages[@]} 2>&1
+	apt-get purge exim4 exim4-base -y 2>&1
 
 	easy_install3 pip 2>&1 > /dev/null
 
@@ -533,7 +534,6 @@ post_install()
 
     /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
 
-	apt-get purge exim4 exim4-base -y
     apt-get autoremove
     apt-get autoclean
     rm -fr /var/lib/apt /usr/src/build

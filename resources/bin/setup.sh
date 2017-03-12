@@ -74,6 +74,7 @@ export packages=(
 	'pwgen'
 	'python2.7-dev'
 	'python3'
+	'python3-dns'
 	'python3-setuptools'
 	'python-virtualenv'
 	'pyzor'

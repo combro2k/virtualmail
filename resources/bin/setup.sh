@@ -11,7 +11,7 @@ export packages=(
 	'cabextract'
 	'cpio'
 	'cron'
-    'cpanminus'
+    	'cpanminus'
 	'curl'
 	'fcgiwrap'
 	'git'
@@ -378,6 +378,8 @@ opendkim()
 	./configure --prefix=/usr 2>&1
 	make 2>&1
 	make install 2>&1
+	
+	mkdir -p /etc/opendkim/keys
 
     return 0
 }

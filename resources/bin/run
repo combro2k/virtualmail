@@ -13,6 +13,10 @@ for file in $(cd /etc/skeletons && find . -type f -printf '%P\n'); do
     if [ -f /etc/${file} ]; then
         mv -f /etc/${file} /etc/${file}.1
     fi
+    
+    if [ ! -d $(dirname /etc/${file}) ]; then
+        mkdir -p $(dirname /etc/${file})
+    fi
 
     cp -f /etc/skeletons/${file} /etc/${file}
 

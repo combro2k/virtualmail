@@ -10,8 +10,9 @@ echo ${HOSTNAME} > /etc/mailname
 # Create directories if they aren't created
 if [ ! -f /etc/aliases ]; then
     touch /etc/aliases
-    /usr/bin/newaliases
 fi
+
+/usr/bin/newaliases
 
 if [ ! -d /var/run/clamav ]; then
     mkdir -p /var/run/clamav/

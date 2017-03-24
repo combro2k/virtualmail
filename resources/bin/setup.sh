@@ -11,7 +11,7 @@ export packages=(
 	'cabextract'
 	'cpio'
 	'cron'
-    	'cpanminus'
+	'cpanminus'
 	'curl'
 	'fcgiwrap'
 	'git'
@@ -326,7 +326,7 @@ dovecot()
 	DOVECOT_MAIN=$(echo "${PARSE[0]}.${PARSE[1]}")
 	curl --silent -L \
         http://dovecot.org/releases/${DOVECOT_MAIN}/dovecot-${DOVECOT_VERSION}.tar.gz | tar zx --strip-components=1 2>&1
-	./configure --prefix=/usr --sysconfdir=/etc --with-mysql --with-ssl --without-shared-libs 2>&1
+	./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --runstatedir=/run --with-mysql --with-ssl --without-shared-libs 2>&1
 	make 2>&1
     make install 2>&1
 
@@ -335,7 +335,7 @@ dovecot()
 	curl --silent -L \
         http://pigeonhole.dovecot.org/releases/${DOVECOT_MAIN}/dovecot-${DOVECOT_MAIN}-pigeonhole-${DOVECOT_PIGEONHOLE}.tar.gz | tar zx --strip-components=1 2>&1
 
-	./configure --prefix=/usr --sysconfdir=/etc 2>&1
+	./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --runstatedir=/run 2>&1
 	make 2>&1
 	make install 2>&1
 

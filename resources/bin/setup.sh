@@ -97,8 +97,8 @@ export POSTFIX_VERSION=3.2.0
 export DOVECOT_VERSION=2.2.28
 export DOVECOT_PIGEONHOLE=0.4.17
 export OPENDKIM_VERSION=2.10.3
-export PYPOLICYD_SPF_MAIN=1.3
-export PYPOLICYD_SPF_VERSION=1.3.2
+export PYPOLICYD_SPF_MAIN=2.0
+export PYPOLICYD_SPF_VERSION=2.0.1
 export CLAMAV_VERSION=0.99.2
 export CLAMAV_MAIN=production
 export AMAVISD_NEW_VERSION=2.11.0
@@ -389,7 +389,7 @@ spf()
 	mkdir -p /etc/postfix-policyd-spf-python
 
 	pip install \
-        authres pyspf https://ipaddr-py.googlecode.com/files/ipaddr-2.1.5-py3k.tar.gz py3dns --pre 2>&1
+        authres pyspf https://github.com/google/ipaddr-py/archive/master.tar.gz py3dns --pre 2>&1
 
 	pip install \
         https://launchpad.net/pypolicyd-spf/${PYPOLICYD_SPF_MAIN}/${PYPOLICYD_SPF_VERSION}/+download/pypolicyd-spf-${PYPOLICYD_SPF_VERSION}.tar.gz 2>&1

@@ -480,11 +480,10 @@ install_node_nvm()
 
 milter_manager()
 {
-    eval load_rvm
+    	eval load_rvm
 
 	cd /usr/src/build/milter-manager
-	curl --silent -L \
-        https://github.com/milter-manager/milter-manager/archive/master.tar.gz | tar zx --strip-components=1 2>&1
+	curl --silent -L https://github.com/milter-manager/milter-manager/releases/download/2.1.0/milter-manager-2.1.0.tar.gz | tar zx --strip-components=1 2>&1
 	[ ! -f ./configure ] && ./autogen.sh 2>&1
 
 	/bin/bash -l -c './configure --prefix=/usr --sysconfdir=/etc --with-package-platform=debian' 2>&1

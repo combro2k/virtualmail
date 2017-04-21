@@ -536,8 +536,12 @@ post_install()
 
     /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
 
+    apt-get purge -yq build-essential git
+    
     apt-get autoremove
     apt-get autoclean
+
+
     rm -fr /var/lib/apt /usr/src/build
 
     return 0

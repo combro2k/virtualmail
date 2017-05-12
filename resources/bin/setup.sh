@@ -536,10 +536,28 @@ post_install()
 
     /usr/bin/freshclam --config-file=/etc/clamav/freshclam.conf
 
-    apt-get purge -yq build-essential git
+    apt-get purge -yq \
+	    build-essential \
+	    git \
+	    libbind-dev \
+	    libbsd-dev \
+	    libcurl4-openssl-dev \
+	    libcurlpp-dev \
+	    libdb-dev \
+	    libgeoip-dev \
+	    libglib2.0-dev \
+	    libicu-dev \
+	    libmilter-dev \
+	    libmysqlclient-dev \
+	    libpcre3-dev \
+	    libpthread-stubs0-dev \
+	    libspf2-dev \
+	    libssl-dev \
+	    python2.7-dev
     
-    apt-get autoremove
+    apt-get autoremove --purge
     apt-get autoclean
+    apt-get clean
 
 
     rm -fr /var/lib/apt /usr/src/build
@@ -556,8 +574,8 @@ build() {
 	tasks=(
 		'create_users'
 		'pre_install'
-        'install_ruby_rvm'
-        'install_node_nvm'
+		'install_ruby_rvm'
+		'install_node_nvm'
 		'clamav'
 		'bitdefender'
 		'spamassassin'
